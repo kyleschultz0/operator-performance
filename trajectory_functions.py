@@ -28,6 +28,7 @@ def max_vel(f):
         if vel > vel_max:
             vel_max = vel
             t_max = t
+    vel_max = (window_size/2 - 100)*vel_max
     return t_max, vel_max
   
 def screen_trajectory(t, f):

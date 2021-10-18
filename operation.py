@@ -11,7 +11,7 @@ from os import path
 type = "controller"
 #type = "hebi"
 #type = "encoder"
-f = 0.1
+f = 0.05
 T = 1/f
 
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
 
     if type == "controller":
-        gain = 400*vel_max
+        gain = vel_max
         print(gain)
         input_ball = Ball(pos_i, input_ball_radius, "white", animation_canvas)
         pos_input = pos_i
