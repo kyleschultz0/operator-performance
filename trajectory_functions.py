@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+window_size = 1000
 
 #=== Lissajous variables ===#
 a = 2*np.pi
@@ -29,6 +30,10 @@ def max_vel(f):
             t_max = t
     return t_max, vel_max
   
+def screen_trajectory(t, f):
+    return np.round(window_size/2 - 50 + (window_size/2 - 100)*trajectory(t, f))
+  
+
 
 # to test functions:
 if __name__ == "__main__":

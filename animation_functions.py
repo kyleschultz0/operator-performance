@@ -1,6 +1,7 @@
 import tkinter
 from time import time, sleep
-from trajectory_functions import *
+import numpy as np
+from trajectory_functions import screen_trajectory
 
 
 f = 0.1
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
-    pos = np.round(window_size/2 - 50 + (window_size/2 - 100)*trajectory(0, f))
+    pos = screen_trajectory(0, f)
 
     target_ball = Ball(pos, target_ball_radius, "red", animation_canvas)
     input_ball = Ball(pos, input_ball_radius, "white", animation_canvas)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
 
     while True:
         t = time() - t0
-        pos = np.round(window_size/2 - 50 + (window_size/2 - 100)*trajectory(t, f))
+        pos = screen_trajectory(t, f)
         target_ball.move(pos)
         animation_window.update()
 
