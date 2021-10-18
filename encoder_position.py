@@ -8,8 +8,8 @@ from animation_functions import *
  
 
 #=== variables for 2 dof ===#
-L1 = 0.29
-L2 = 0.22
+L1 = 0.27
+L2 = 0.25
 #======#
 
 
