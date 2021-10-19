@@ -11,7 +11,7 @@ from os import path
 type = "hebi"
 #type = "controller"
 #type = "encoder"
-f = 0.05
+f = 0.1
 T = 1/f
 
 
@@ -27,10 +27,10 @@ L2 = 0.25
 def save_data(output):
     fs = str(f)
     f_r = fs.replace('.', '')
-    save_name = "csv/{}_{}_1".format(type, f_r)
+    save_name = "csv/{}_{}_1.csv".format(type, f_r)
     for i in range(2, 100):
         if path.exists(save_name) is True:
-            save_name = "csv/{}_{}_{}".format(type, f_r, i)
+            save_name = "csv/{}_{}_{}.csv".format(type, f_r, i)
         else:
             break
 
@@ -61,18 +61,10 @@ if __name__ == "__main__":
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
 
-    pos_i = screen_trajectory(0, f)
-    target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
-
-    if type == "controller":
-        gain = vel_max
-        print(gain)
-        input_ball = Ball(pos_i, input_ball_radius, "white", animation_canvas)
-        pos_input = pos_i
 
     if type == "hebi" or type == "encoder":
-        K = 0.5*(1/window_size)*vel_max*np.matrix([[1, 0],
-                                             [0, 1]])
+        K = 0.4*(1/window_size)*vel_max*np.matrix([[1, 0],
+                                                   [0, 1]])
         #K = np.matrix([[0.02, 0],
         #               [0, 0.02]])
         print("Gain matrix:", K)
@@ -88,11 +80,21 @@ if __name__ == "__main__":
         theta2i = 0.4156
         set_hebi_position(group, hebi_feedback, command, theta1i, theta2i)
 
+    pos_i = screen_trajectory(0, f)
+    target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
+
+    if type == "controller":
+        gain = vel_max
+        print(gain)
+        input_ball = Ball(pos_i, input_ball_radius, "white", animation_canvas)
+        pos_input = pos_i
+
     if type == "hebi":
         pos0 = calculate_hebi_position(group, hebi_feedback, offset = 0)
         offset = pos_i - pos0
         input_ball = Ball(calculate_hebi_position(group, hebi_feedback, offset), input_ball_radius, "white", animation_canvas)
-        print(calculate_hebi_position(group, hebi_feedback, offset))
+        print("Offset 1:", offset)
+        # print(calculate_hebi_position(group, hebi_feedback, offset))
 
     if type == "encoder":
         arduino = initialize_encoders()
@@ -110,12 +112,19 @@ if __name__ == "__main__":
     t_draw = t0
 
     while True:
+
        t = time() - t0
        #print("Effort:", command.effort)
        # print("Velocity", command.velocity)
        #print("Position", command.position)
        if type == "controller":
            pos_input, t_draw = controller_draw(joystick,pos_input,t_draw,gain)
+           
+       if type == "hebi":
+           pos_input = calculate_hebi_position(group, hebi_feedback, offset)
+
+       if type == "encoder":
+           pos_input = calculate_encoder_position(arduino, offset)
 
        if type == "hebi" or type == "encoder":
            theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)  
@@ -124,19 +133,14 @@ if __name__ == "__main__":
            # print("Omega d:", omega_d)
            command.velocity = omega_d
            group.send_command(command)
-           
-       if type == "hebi":
-           pos_input = calculate_hebi_position(group, hebi_feedback, offset)
-
-       if type == "encoder":
-           pos_input = calculate_encoder_position(arduino, offset)
-
 
        pos = screen_trajectory(t, f)
        target_ball.move(pos)
        input_ball.move(pos_input)
        animation_window.update()
-       # output += [[t, theta[0], theta[1], omega_d[0], omega_d[1], omega[0], omega[1], axis[0], pos[0], pos[1], pos_draw[0], pos_draw[1]]]
+
+       output += [[t, pos[0], pos[1], pos_input[0], pos_input[1]]]
+
        if i == 0:
            print("Ready to operate...")
            i = 1

@@ -20,7 +20,7 @@ L1 = 0.27
 L2 = 0.25
 #======#
 
-workspace_size = 0.32
+workspace_size = 0.25
 
 def calculate_hebi_position(group, hebi_feedback, offset):
     pos_scale = window_size/workspace_size
@@ -106,6 +106,7 @@ def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i):
             break
     command.effort = np.nan
     command.position = np.nan
+    sleep(1)
     print('Initialization complete')
     print('Running Trajectory')
     return
