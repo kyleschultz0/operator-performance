@@ -33,7 +33,27 @@ def max_vel(f):
   
 def screen_trajectory(t, f):
     return np.round(window_size/2 - 50 + (window_size/2 - 100)*trajectory(t, f))
-  
+
+def trajectory_size(f):
+    T = 1/f
+    dt = 0.001
+    t = 0
+    xmin = ymin = ymax = xmax = 0
+    while t < T-dt:
+        t += dt
+        pos = screen_trajectory(t, f)
+        x = pos[0]
+        y = pos[1]
+        if x > xmax:
+            xmax = x
+        if y > ymax:
+            ymax = y
+        if x < xmin:
+            xmin = x
+        if y < ymin:
+            ymin = y
+    center = np.array([xmax - xmin, ymax - ymin])/2
+    return center
 
 
 # to test functions:
@@ -46,7 +66,8 @@ if __name__ == "__main__":
     t_max, vel_max = max_vel(f)
     print("Max velocity:", vel_max)
     print("Time of max velocity:", t_max)
-
+    center = trajectory_size(f)
+    print(center)
     plt.plot(pos[0, :], pos[1, :])
     plt.show()
    
