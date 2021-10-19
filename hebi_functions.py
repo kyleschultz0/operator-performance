@@ -40,6 +40,7 @@ def get_hebi_feedback(group, hebi_feedback, joint_offsets=np.array([-np.pi/2, 0.
     omega = np.array(hebi_feedback.velocity)
     torque = np.array(hebi_feedback.effort)
     theta -= joint_offsets
+    theta = theta - np.array([1.58702857, -0.08002613])
     if (theta > limits).any():
         limit_stop_flag = True
     return theta, omega, torque, limit_stop_flag

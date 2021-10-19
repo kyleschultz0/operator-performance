@@ -12,10 +12,12 @@ L1 = 0.27
 L2 = 0.25
 #======#
 
+workspace_size = 0.32
 
 def calculate_encoder_position(arduino, offset):
     theta = get_encoder_feedback(arduino, num_encoders=2)
-    pos = 2000*np.array([-L1*np.sin(theta[0]) - L2*np.cos(theta[0]+theta[1]), L1*np.cos(theta[0])-L2*np.sin(theta[0]+theta[1])])
+    pos_scale = window_size/workspace_size
+    pos = pos_scale*np.array([-L1*np.sin(theta[0]) - L2*np.cos(theta[0]+theta[1]), L1*np.cos(theta[0])-L2*np.sin(theta[0]+theta[1])])
     pos[1] = animation_window_height - pos[1]
     pos += offset
     return pos
@@ -26,7 +28,7 @@ if __name__ == "__main__":
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
 
-    pos0 = encoder_position(arduino, offset = 0)
+    pos0 = calculate_encoder_position(arduino, offset = 0)
     offset = (window_size/2)*np.array([1, 1]) - pos0
     input_ball = Ball(calculate_encoder_position(arduino, offset), input_ball_radius, "white", animation_canvas)
     animation_window.update()

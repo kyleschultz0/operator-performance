@@ -20,14 +20,11 @@ L1 = 0.27
 L2 = 0.25
 #======#
 
-theta1i = 0.4599
-theta2i = 0.4156
+workspace_size = 0.32
 
-def calculate_hebi_position(group, hebi_feedback, scale, offset):
-    pos_scale = window_size/(L1+L2)
+def calculate_hebi_position(group, hebi_feedback, offset):
+    pos_scale = window_size/workspace_size
     theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)
-    print(pos_scale)
-    theta = theta - np.array([1.58702857, -0.08002613])
     pos = pos_scale*np.array([-L1*np.sin(theta[0]) - L2*np.cos(theta[0]+theta[1]), L1*np.cos(theta[0])-L2*np.sin(theta[0]+theta[1])])
     pos[1] = animation_window_height - pos[1]
     pos += offset
@@ -88,7 +85,7 @@ def initializing_controller2(theta,theta_d,tol):
     else:
         return effort, False
 
-def set_hebi_position(group, hebi_feedback, theta1i, theta2i):
+def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i):
     print('Moving to initial position')
     theta_d = np.array([theta1i, theta2i])
     omega_d = np.zeros(2)
@@ -96,8 +93,8 @@ def set_hebi_position(group, hebi_feedback, theta1i, theta2i):
     converged2 = False
     t, t0 = reset_timer()
     while not converged2:
-        h_theta, h_omega, _ = get_hebi_feedback(group, hebi_feedback)     
-        t = loop_timer(t0, T, print_loop_time=False)
+        h_theta, h_omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback) 
+        t = loop_timer(t0, 0.01, print_loop_time=False)
         if not converged1:
             effort, converged1 = initializing_controller1(h_theta,theta_d,h_omega,omega_d, init_tol1)
         else:
@@ -107,6 +104,8 @@ def set_hebi_position(group, hebi_feedback, theta1i, theta2i):
         if keyboard.is_pressed('esc'):
             print("(Initialization) Stopping: User input stop command")
             break
+    command.effort = np.nan
+    command.position = np.nan
     print('Initialization complete')
     print('Running Trajectory')
     return
@@ -132,24 +131,24 @@ if __name__ == "__main__":
     theta1i = 0.4599
     theta2i = 0.4156
 
-    set_hebi_position(group, hebi_feedback, theta1i, theta2i)
+    set_hebi_position(group, hebi_feedback, command, theta1i, theta2i)
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
 
     theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback) 
 
-    pos0 = calculate_hebi_position(group, hebi_feedback, scale_factor, offset = 0)
+    pos0 = calculate_hebi_position(group, hebi_feedback, offset = 0)
     offset = (window_size/2)*np.array([1, 1]) - pos0
 
 
-    input_ball = Ball(calculate_hebi_position(group, hebi_feedback, scale_factor, offset), input_ball_radius, "white", animation_canvas)
+    input_ball = Ball(calculate_hebi_position(group, hebi_feedback, offset), input_ball_radius, "white", animation_canvas)
     animation_window.update()
 
     t0 = time()
 
     while True:
-        pos = calculate_hebi_position(group, hebi_feedback, scale_factor, offset)
+        pos = calculate_hebi_position(group, hebi_feedback, offset)
         input_ball.move(pos)
         animation_window.update()
 

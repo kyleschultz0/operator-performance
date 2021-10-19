@@ -1,4 +1,4 @@
-from hebi_position import calculate_hebi_position
+from hebi_position import calculate_hebi_position, set_hebi_position
 from hebi_functions import initialize_hebi, get_hebi_feedback, send_hebi_position_command, send_hebi_effort_command
 from encoder_position import calculate_encoder_position
 from encoder_functions import initialize_encoders
@@ -8,8 +8,8 @@ from os import path
 
 
 #=== Change these to gather trials ===#
-type = "controller"
-#type = "hebi"
+type = "hebi"
+#type = "controller"
 #type = "encoder"
 f = 0.05
 T = 1/f
@@ -45,7 +45,7 @@ def calculate_velocity(theta, joystick, K):
 
        Jinv = np.matrix([[-cos(theta1 + theta2)/(L1*cos(theta2)), -sin(theta1 + theta2)/(L1*cos(theta2))],
                          [(L2*cos(theta1 + theta2) + L1*sin(theta1))/(L1*L2*cos(theta2)), (L2*sin(theta1 + theta2) - L1*cos(theta1))/(L1*L2*cos(theta2))]])
-
+       # print("Jinv:", Jinv)
        omega_d = Jinv @ K @ axis
        omega_d = np.squeeze(np.asarray(omega_d))
 
@@ -71,8 +71,11 @@ if __name__ == "__main__":
         pos_input = pos_i
 
     if type == "hebi" or type == "encoder":
-        K = 0.1*vel_max*np.matrix([[1, 0],
-                                   [0, 1]])
+        K = 0.5*(1/window_size)*vel_max*np.matrix([[1, 0],
+                                             [0, 1]])
+        #K = np.matrix([[0.02, 0],
+        #               [0, 0.02]])
+        print("Gain matrix:", K)
         freq = 100 # hz
         group, hebi_feedback, command = initialize_hebi()
         group.feedback_frequency = freq
@@ -80,6 +83,10 @@ if __name__ == "__main__":
         group_info = group.request_info()
         if group_info is not None:
             group_info.write_gains("csv/saved_gains.xml")
+        
+        theta1i = 0.4599
+        theta2i = 0.4156
+        set_hebi_position(group, hebi_feedback, command, theta1i, theta2i)
 
     if type == "hebi":
         pos0 = calculate_hebi_position(group, hebi_feedback, offset = 0)
@@ -104,14 +111,17 @@ if __name__ == "__main__":
 
     while True:
        t = time() - t0
-
+       #print("Effort:", command.effort)
+       # print("Velocity", command.velocity)
+       #print("Position", command.position)
        if type == "controller":
            pos_input, t_draw = controller_draw(joystick,pos_input,t_draw,gain)
 
        if type == "hebi" or type == "encoder":
            theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)  
-           theta = theta - np.array([1.58702857, -0.08002613])
+           print("Theta:", theta)
            omega_d = calculate_velocity(theta, joystick, K)
+           # print("Omega d:", omega_d)
            command.velocity = omega_d
            group.send_command(command)
            
@@ -126,7 +136,7 @@ if __name__ == "__main__":
        target_ball.move(pos)
        input_ball.move(pos_input)
        animation_window.update()
-
+       # output += [[t, theta[0], theta[1], omega_d[0], omega_d[1], omega[0], omega[1], axis[0], pos[0], pos[1], pos_draw[0], pos_draw[1]]]
        if i == 0:
            print("Ready to operate...")
            i = 1
