@@ -18,8 +18,8 @@ T = 1/f
 #=== Global variables ===#
 
 # Link lengths for 2 DOF:
-L1 = 0.29
-L2 = 0.22
+L1 = 0.27
+L2 = 0.25
 
 
 
