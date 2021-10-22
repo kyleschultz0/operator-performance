@@ -54,6 +54,7 @@ def send_hebi_position_command(group, command, joint_offsets=np.array([-np.pi/2,
     # length of joint offsets must be consistent with number of joints
     offset_command = command.position
     offset_command += joint_offsets
+    offset_command = offset_command + np.array([1.58702857, -0.08002613])
     command.position = offset_command.tolist()
     group.send_command(command)
     return

@@ -19,11 +19,11 @@
 	</position>
 	<velocity>
 		<kp>0.030000 0.050000</kp>
-		<ki>0.000000 0.000000</ki>
+		<ki>1.000000 1.000000</ki>
 		<kd>0.000000 0.000000</kd>
 		<feed_forward>1.000000 1.000000</feed_forward>
 		<dead_zone>0.000000 0.000000</dead_zone>
-		<i_clamp>0.250000 0.250000</i_clamp>
+		<i_clamp>0.750000 0.750000</i_clamp>
 		<punch>0.000000 0.000000</punch>
 		<min_target>-1.502675 -1.502675</min_target>
 		<max_target>1.502675 1.502675</max_target>
