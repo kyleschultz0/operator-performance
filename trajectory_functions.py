@@ -2,15 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 window_size = 1000
 
-#=== Lissajous variables ===#
-a = 2*np.pi
-a_per_b = 0.5
-b = a/a_per_b
-d = np.pi/4;
-
 def trajectory(t, f):
-    xd = np.sin(a*f*t+d)
-    yd = np.cos(b*f*t)
+
+    #=== Lissajous variables ===#
+    a = 2*np.pi
+    a_per_b = 0.5
+    b = a/a_per_b
+    d = np.pi/4
+    #xd = np.sin(a*f*t+d)
+    #yd = np.cos(b*f*t)
+
+    #=== Circle Variables ===#
+    w = 2*np.pi*f
+    xd = np.cos(w*t)
+    yd = np.sin(w*t)
+    
     pos = np.array([xd, yd])
     return pos
 

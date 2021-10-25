@@ -46,15 +46,13 @@ def u_s_filter(q, cutoff_freq, T=0.01):
 
 def smooth_backlash_inverse(theta, omega, GPR_models=None,
                             cutoff_freq=0.85, T=0.01,
-                            c_R=[0,0], c_L=[0,0], m=[1,1],
-                            converged_tol=0.001):
+                            c_R=[0,0], c_L=[0,0], m=[1,1]):
     global u_s
 
     if GPR_models != None:
         c_R[1] = GPR_models[0].predict(theta[0].reshape(1,-1), return_std=False)[0]
         c_L[1] = GPR_models[1].predict(theta[0].reshape(1,-1), return_std=False)[0] 
         m[1] = GPR_models[2].predict(theta[0].reshape(1,-1), return_std=False)[0]
-
     if omega[0] > 0:
         u_s[0] = -c_R[0]
     elif omega[0] < 0:
@@ -73,18 +71,7 @@ def smooth_backlash_inverse(theta, omega, GPR_models=None,
     theta_d_hebi[1] /= m[1]
     theta_d_hebi[1] += u_s[1]
 
-    if omega[0] > 0:
-        backlash_converged0 = (abs(u_s[0]+c_R[0]) <  converged_tol)
-    elif omega[0] < 0:
-        backlash_converged0 = (abs(u_s[0]+c_L[0]) <  converged_tol)
-    else: backlash_converged0 = True
-    if omega[1] > 0:
-        backlash_converged1 = (abs(u_s[1]+c_R[1]) <  converged_tol)
-    elif omega[1] < 0:
-        backlash_converged1 = (abs(u_s[1]+c_L[1]) <  converged_tol)
-    else: backlash_converged1 = True
-
-    return theta_d_hebi, backlash_converged0, backlash_converged1
+    return theta_d_hebi
 
 def estimate_human_theta_d(omega_d, human_theta_d):
     return human_theta_d
