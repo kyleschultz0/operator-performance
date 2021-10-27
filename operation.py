@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 #type = "hebi"
 #type = "controller"
 type = "encoder"
-backlash_compensation = 1
-include_GPR = 0
+backlash_compensation = True
+include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
 T = 1/f
@@ -151,19 +151,29 @@ if __name__ == "__main__":
     t0 = time()
     t_draw = t0
 
+    # set timer
     _, t0w = reset_timer()
     Tw = 0.01
-    user_cutoff_freq = 1.5
+
+    # backlash compensation parameters
+    user_cutoff_freq = 5.0
     bl_cutoff_freq = 0.5
     Kp = [50.0, 40.0] # [Kp1, Kp2]
-    c_R = [-0.033, 0.027]
-    c_L = [0.1598, 0.5273]
-    m = [0.9627, 0.9675]
+    c_R = [0.02275, 0.043848]
+    c_L = [0.18483, 0.314722]
+    m = [0.97676, 0.97014]
+
+    # collect error metrics
     count = 0
     rmse_sum = 0
 
+    # initialize backlash parameter according to initializing controller setup
+    global u_s
+    u_s = -np.array(c_R)
+
     if type == "encoder" or type == "hebi":
         human_theta_d, _, _, _ = get_hebi_feedback(group, hebi_feedback)  
+        human_theta_d = [theta1i, theta2i]
 
     while True:
        count += 1
