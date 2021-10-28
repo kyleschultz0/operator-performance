@@ -72,6 +72,7 @@ if __name__ == "__main__":
         pos = screen_trajectory(t, f)
         target_ball.move(pos)
         animation_window.update()
+        sleep(10)
 
         if t > (T):
             print("Stopping: trajectory completed")

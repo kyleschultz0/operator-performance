@@ -21,7 +21,7 @@ xi = -0.1; yi = -0.1; size = 0.32;
 plot([xi, xi, xi - size, xi - size, xi],....
      [yi, yi + size, yi + size, yi, yi],'LineWidth',2,'color','k')
  
-plot(xi - size/2, yi + size/2, "b*")
+plot(xi - size/2, yi + size/2, "b*",'LineWidth',2)
 
  
  %% Inverse kinematics for initial position
@@ -48,5 +48,19 @@ TH2_MLF{2} = matlabFunction(S.theta2(2),'Vars',[L_1 L_2 XE YE]);
 
 tmp_th1 = TH1_MLF{1}(L1,L2,-0.13-0.3/2,-0.1+0.3/2)
 tmp_th2 = TH2_MLF{1}(L1,L2,-0.13-0.3/2,-0.1+0.3/2)
+
+t_step = 0.01;
+f = 0.05;
+a = 2*pi*f;
+t = 0:t_step:1/f;
+a_per_b = 0.5;
+b = a/a_per_b;
+window_size = 400; % square window
+d = pi/4;
+
+x = size/2.2*sin(a*t+d) + xi - size/2;
+y = size/2.2*cos(b*t) + yi + size/2;
+
+plot(x, y, 'LineWidth',1,'color','b')
 
 
