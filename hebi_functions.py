@@ -40,6 +40,7 @@ def get_hebi_feedback(group, hebi_feedback, joint_offsets=np.array([-np.pi/2, 0.
     omega = np.array(hebi_feedback.velocity)
     torque = np.array(hebi_feedback.effort)
     theta -= joint_offsets
+    theta = theta - np.array([1.58702857, -0.08002613])
     if (theta > limits).any():
         limit_stop_flag = True
     return theta, omega, torque, limit_stop_flag
@@ -53,6 +54,7 @@ def send_hebi_position_command(group, command, joint_offsets=np.array([-np.pi/2,
     # length of joint offsets must be consistent with number of joints
     offset_command = command.position
     offset_command += joint_offsets
+    offset_command = offset_command + np.array([1.58702857, -0.08002613])
     command.position = offset_command.tolist()
     group.send_command(command)
     return

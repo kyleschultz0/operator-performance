@@ -46,11 +46,25 @@ def create_animation_window():
   window.geometry(f'{animation_window_width}x{animation_window_height}')
   return window
  
+# create circle on Tk canvas:
+def add_circle(x, y, r, canvasName, color="white"): #center coordinates, radius, canvas, color
+    x0 = x - r
+    y0 = y - r
+    x1 = x + r
+    y1 = y + r
+    return canvasName.create_oval(x0, y0, x1, y1, fill=color)
+
 # Create a canvas for animation and add it to main window
 def create_animation_canvas(window):
   canvas = tkinter.Canvas(window)
   canvas.configure(bg="black")
   canvas.pack(fill="both", expand=True)
+
+  # replace with arbitrary trajectory follower
+  # why isnt it centered?
+  circle_linew = 2
+  add_circle(450, 450, 400+circle_linew/2, canvas, "white")
+  add_circle(450, 450, 400-circle_linew/2, canvas, "black")
   return canvas
 
 
