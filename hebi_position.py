@@ -13,7 +13,7 @@ init3_e1 = 0
 init3_e2 = 0
 init_tol1 = 0.15 # rad
 init_tol2 = 0.01 # rad
-init_tol3 = 0.03 # rad
+init_tol3 = 0.01 # rad
  
 # Initialize loop timer previous time:
 t_1 = 0
@@ -23,7 +23,7 @@ L1 = 0.285
 L2 = 0.265
 #======#
 
-workspace_size = 0.25
+workspace_size = 0.39
 
 def calculate_hebi_position(group, hebi_feedback, offset):
     pos_scale = window_size/workspace_size
@@ -148,10 +148,6 @@ def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i):
 if __name__ == "__main__":
     output = []
     freq = 100 # hz
-    square_size = 0.32
-    scale_factor = window_size/square_size
-
-
     
     group, hebi_feedback, command = initialize_hebi()
     group.feedback_frequency = freq
@@ -160,8 +156,8 @@ if __name__ == "__main__":
     if group_info is not None:
         group_info.write_gains("csv/saved_gains.xml")
 
-    theta1i = 0.4599
-    theta2i = 0.4156
+    theta1i = 0.4299
+    theta2i = 0.5105
 
     set_hebi_position(group, hebi_feedback, command, theta1i, theta2i)
 

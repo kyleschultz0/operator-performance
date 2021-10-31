@@ -2,8 +2,8 @@ close all; clear all; clc
 addpath rtb common smtb
 
 %% Compute workspace of robot
-L1 = 0.27;
-L2 = 0.25;
+L1 = 0.285;
+L2 = 0.265;
 
 DH(1) = Link([0 0 L1 0]);
 DH(2) = Link([0 0 L2 0]);
@@ -16,7 +16,7 @@ q = {th1,th2};
 plotworkspace(DH,q)
 hold on
 
-xi = -0.1; yi = -0.1; size = 0.32;
+xi = -0.08; yi = -0.15; size = 0.39;
 % Square work area corresponding to GUI window
 plot([xi, xi, xi - size, xi - size, xi],....
      [yi, yi + size, yi + size, yi, yi],'LineWidth',2,'color','k')
@@ -46,8 +46,8 @@ TH1_MLF{2} = matlabFunction(S.theta1(2),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{1} = matlabFunction(S.theta2(1),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{2} = matlabFunction(S.theta2(2),'Vars',[L_1 L_2 XE YE]);
 
-tmp_th1 = TH1_MLF{1}(L1,L2,-0.13-0.3/2,-0.1+0.3/2)
-tmp_th2 = TH2_MLF{1}(L1,L2,-0.13-0.3/2,-0.1+0.3/2)
+tmp_th1 = TH1_MLF{1}(L1,L2,xi - size/2, yi + size/2)
+tmp_th2 = TH2_MLF{1}(L1,L2,xi - size/2, yi + size/2)
 
 t_step = 0.01;
 f = 0.05;
