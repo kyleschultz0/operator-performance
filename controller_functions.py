@@ -2,8 +2,7 @@ import pygame
 import numpy as np
 import keyboard
 import time
-from animation_functions import *
-from trajectory_functions import *
+from animation_functions import trajectory
 
 def initialize_joystick():
         pygame.init()
