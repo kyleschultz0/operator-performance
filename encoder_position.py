@@ -8,8 +8,8 @@ from animation_functions import *
  
 
 #=== variables for 2 dof ===#
-L1 = 0.27
-L2 = 0.25
+L1 = 0.285
+L2 = 0.265
 #======#
 
 workspace_size = 0.15

@@ -3,6 +3,7 @@ from hebi_functions import initialize_hebi, get_hebi_feedback, send_hebi_positio
 from encoder_position import calculate_encoder_position
 from encoder_functions import initialize_encoders
 from controller_functions import *
+from trajectory_functions import max_vel, screen_trajectory
 from numpy import pi, sin, cos
 from os import path
 from backlash_functions import smooth_backlash_inverse, load_GPR_param_models
@@ -10,13 +11,13 @@ import matplotlib.pyplot as plt
 
 
 #=== Change these to gather trials ===#
-#type = "hebi"
+type = "hebi"
 #type = "controller"
-type = "encoder"
-backlash_compensation = True
+#type = "encoder"
+backlash_compensation = False
 include_GPR = False
 model_number = '1'
-f = 0.025 # default: 0.025
+f = 0.05 # default: 0.025
 T = 1/f
 
 
@@ -64,8 +65,19 @@ def save_data(output):
     print("Data saved as:", save_name)
 
 def calculate_velocity(theta, joystick, K):
+        
        axis = get_axis(joystick)
        axis[1] = -axis[1]
+
+       pos = input_ball.pos
+       if pos[0] < input_ball_radius:
+           axis[0] = 0.75
+       elif pos[0] > window_size - input_ball_radius:
+           axis[0] = -0.75
+       elif pos[1] < input_ball_radius:
+           axis[1] = -0.75
+       elif pos[1] > window_size - input_ball_radius:
+           axis[1] = 0.75
        theta1 = theta[0]
        theta2 = theta[1]
 

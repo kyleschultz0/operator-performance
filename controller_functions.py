@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 import keyboard
 import time
-from animation_functions import Ball, create_animation_window, create_animation_canvas
+from animation_functions import *
 
 def initialize_joystick():
         pygame.init()
@@ -23,6 +23,16 @@ def controller_draw(joystick,pos_last,t_draw,gain):
     delta_pos = input*delta_t*gain
     pos = pos_last + delta_pos
     t_draw = time()
+    if pos[0] < input_ball_radius:
+        pos[0] = input_ball_radius
+    elif pos[0] > window_size - input_ball_radius:
+        pos[0] = window_size - input_ball_radius
+    elif pos[1] < input_ball_radius:
+        pos[1] = input_ball_radius
+    elif pos[1] > window_size - input_ball_radius:
+        pos[1] = window_size - input_ball_radius
+        
+        
     return pos, t_draw
 
 
