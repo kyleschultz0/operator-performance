@@ -204,8 +204,11 @@ if __name__ == "__main__":
                 command.effort = e_d
                 group.send_command(command)
 
+     
+
        pos = screen_trajectory(t, f)
        target_ball.move(pos)
+
        input_ball.move(pos_input)
        animation_window.update()
        error = np.sqrt(np.sum(np.square(pos-pos_input)))
