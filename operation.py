@@ -130,7 +130,7 @@ if __name__ == "__main__":
         
         theta1i = 0.4599
         theta2i = 0.4156
-        set_hebi_position(group, hebi_feedback, command, theta1i, theta2i)
+        set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
 
     pos_i = screen_trajectory(0, f)
     target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
