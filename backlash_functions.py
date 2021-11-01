@@ -29,6 +29,17 @@ def load_GPR_param_models(model_number):
     print('GPR models loaded')
     return GPR_models
 
+def initialize_backlash(c_init, m, theta_init):
+    global u_s
+    u_s = -c_init
+
+    theta_init[0] *= m[0]
+    theta_init[0] -= u_s[0]
+    theta_init[1] *= m[1]
+    theta_init[1] -= u_s[1]
+
+    return theta_init
+
 def u_s_filter(q, cutoff_freq, T=0.01):
     global p1k_1
     global q1k_1
@@ -71,11 +82,7 @@ def smooth_backlash_inverse(theta, omega, GPR_models=None,
     theta_d_hebi[1] /= m[1]
     theta_d_hebi[1] += u_s[1]
 
-    return theta_d_hebi
-
-def estimate_human_theta_d(omega_d, human_theta_d):
-    return human_theta_d
-        
+    return theta_d_hebi   
 
 
 if __name__ == "__main__":

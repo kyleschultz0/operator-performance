@@ -6,7 +6,7 @@ from controller_functions import *
 from trajectory_functions import max_vel, screen_trajectory
 from numpy import pi, sin, cos
 from os import path
-from backlash_functions import smooth_backlash_inverse, load_GPR_param_models
+from backlash_functions import smooth_backlash_inverse, load_GPR_param_models, initialize_backlash
 import matplotlib.pyplot as plt
 
 
@@ -19,6 +19,14 @@ include_GPR = False
 model_number = '1'
 f = 0.05 # default: 0.025
 T = 1/f
+
+# backlash compensation parameters
+user_cutoff_freq = 5.0
+bl_cutoff_freq = 0.5
+Kp = [50.0, 40.0] # [Kp1, Kp2]
+c_R = [0.02275, 0.043848]
+c_L = [0.18483, 0.314722]
+m = [0.97676, 0.97014]
 
 
 #=== Global variables ===#
@@ -169,25 +177,15 @@ if __name__ == "__main__":
     _, t0w = reset_timer()
     Tw = 0.01
 
-    # backlash compensation parameters
-    user_cutoff_freq = 5.0
-    bl_cutoff_freq = 0.5
-    Kp = [50.0, 40.0] # [Kp1, Kp2]
-    c_R = [0.02275, 0.043848]
-    c_L = [0.18483, 0.314722]
-    m = [0.97676, 0.97014]
-
     # collect error metrics
     count = 0
     rmse_sum = 0
 
-    # initialize backlash parameter according to initializing controller setup
-    global u_s
-    u_s = -np.array(c_R)
-
-    if type == "encoder" or type == "hebi":
-        human_theta_d, _, _, _ = get_hebi_feedback(group, hebi_feedback)  
-        human_theta_d = [theta1i, theta2i]
+    if type == "encoder" or type == "hebi" and backlash_compensation:
+        theta_init, _, _, _ = get_hebi_feedback(group, hebi_feedback)  
+        theta_init = np.array(theta_init)
+        c_init = np.array(c_R)
+        human_theta_d = initialize_backlash(c_init, m, theta_init)
 
     while True:
        count += 1
@@ -213,12 +211,10 @@ if __name__ == "__main__":
             else:
                 omega_f = user_input_filter(omega_d, cutoff_freq=user_cutoff_freq, T=Tw)
                 human_theta_d += omega_f * Tw
-                theta_d = smooth_backlash_inverse(human_theta_d, omega_f, GPR_models=GPR_models, c_R=c_R, c_L=c_L, m=m, cutoff_freq=bl_cutoff_freq)   
+                theta_d = smooth_backlash_inverse(human_theta_d, omega_f, GPR_models=GPR_models, c_R=c_R, c_L=c_L, m=m, cutoff_freq=bl_cutoff_freq)
                 e_d = P_controller(theta, theta_d, Kp)
                 command.effort = e_d
                 group.send_command(command)
-
-     
 
        pos = screen_trajectory(t, f)
        target_ball.move(pos)
@@ -258,5 +254,9 @@ if __name__ == "__main__":
 
        if keyboard.is_pressed('esc'):
            print("Trajectory interupted")
-           break
+           #break
+           while True:
+               command.velocity = np.nan*np.ones(2)
+               command.effort = np.zeros(2)
+               group.send_command(command)
 

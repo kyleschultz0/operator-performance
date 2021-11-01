@@ -112,7 +112,8 @@ def initializing_controller3(theta,theta_d,omega,omega_d,tol):
         return effort, False
 
 def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type):
-    print('Moving to initial position')
+    print(' ')
+    print('Moving to initial position...')
     theta_d = np.array([theta1i, theta2i])
     omega_d = np.zeros(2)
     converged1 = False
@@ -136,7 +137,7 @@ def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type):
 
     if type == "encoder":
         sleep(0.2)
-        print("Compensating backlash...")
+        print("Resetting backlash...")
         while not converged3:
             h_theta, h_omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback) 
             t = loop_timer(t0, 0.01, print_loop_time=False)
@@ -148,7 +149,9 @@ def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type):
     command.position = np.nan
     sleep(0.5)
     print('Initialization complete')
-    print('Running Trajectory')
+    print(' ')
+    print('Running Trajectory...')
+    print(' ')
     return
 
 
