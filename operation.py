@@ -113,8 +113,10 @@ if __name__ == "__main__":
 
         if backlash_compensation: 
             K_gain = 0.45
+            K_gain = 1.0
         else: 
             K_gain = 0.50
+            K_gain = 1.0
         K = K_gain*(1/window_size)*vel_max*np.matrix([[1, 0],
                                                       [0, 1]]) # gain was 0.3 with joystick
         #K = np.matrix([[0.02, 0],
