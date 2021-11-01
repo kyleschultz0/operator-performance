@@ -5,6 +5,8 @@ addpath rtb common smtb
 L1 = 0.285;
 L2 = 0.265;
 
+window_size = 1000; % pixels
+
 DH(1) = Link([0 0 L1 0]);
 DH(2) = Link([0 0 L2 0]);
 th1 = 0:0.05:pi;
@@ -16,12 +18,17 @@ q = {th1,th2};
 plotworkspace(DH,q)
 hold on
 
-xi = -0.08; yi = -0.15; size = 0.39;
-% Square work area corresponding to GUI window
-plot([xi, xi, xi - size, xi - size, xi],....
-     [yi, yi + size, yi + size, yi, yi],'LineWidth',2,'color','k')
+xc = -0.08; yc = -0.15; size = 0.39;    % center and size of square
+
+plot([xc, xc, xc - size, xc - size, xc],....
+     [yc, yc + size, yc + size, yc, yc],'LineWidth',2,'color','k')
  
-plot(xi - size/2, yi + size/2, "b*",'LineWidth',2)
+ 
+trajOffx = (window_size/2-100)/window_size*size;
+
+xi = xc - size/2 + trajOffx;
+yi = yc + size/2;
+plot(xi, yi, "b*",'LineWidth',2)
 
  
  %% Inverse kinematics for initial position
@@ -46,8 +53,8 @@ TH1_MLF{2} = matlabFunction(S.theta1(2),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{1} = matlabFunction(S.theta2(1),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{2} = matlabFunction(S.theta2(2),'Vars',[L_1 L_2 XE YE]);
 
-tmp_th1 = TH1_MLF{1}(L1,L2,xi - size/2, yi + size/2)
-tmp_th2 = TH2_MLF{1}(L1,L2,xi - size/2, yi + size/2)
+tmp_th1 = TH1_MLF{1}(L1,L2,xi,yi)
+tmp_th2 = TH2_MLF{1}(L1,L2,xi,yi)
 
 t_step = 0.01;
 f = 0.05;
@@ -55,11 +62,10 @@ a = 2*pi*f;
 t = 0:t_step:1/f;
 a_per_b = 0.5;
 b = a/a_per_b;
-window_size = 400; % square window
 d = pi/4;
 
-x = size/2.2*sin(a*t+d) + xi - size/2;
-y = size/2.2*cos(b*t) + yi + size/2;
+x = size/2.2*sin(a*t+d) + xc - size/2;
+y = size/2.2*cos(b*t) + yc + size/2;
 
 plot(x, y, 'LineWidth',1,'color','b')
 
