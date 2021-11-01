@@ -23,7 +23,7 @@ L1 = 0.285
 L2 = 0.265
 #======#
 
-workspace_size = 0.39
+workspace_size = 0.37
 
 type = "hebi"
 
@@ -168,8 +168,8 @@ if __name__ == "__main__":
     if group_info is not None:
         group_info.write_gains("csv/saved_gains.xml")
 
-    theta1i = 0.0227
-    theta2i = 1.1095
+    theta1i = 0.2827
+    theta2i = 1.0694
 
     set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
 

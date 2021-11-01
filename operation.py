@@ -138,8 +138,8 @@ if __name__ == "__main__":
         if group_info is not None:
             group_info.write_gains("csv/saved_gains.xml")
         
-        theta1i = 0.0227
-        theta2i = 1.1095
+        theta1i = 0.2827
+        theta2i = 1.0694
         set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
 
     pos_i = screen_trajectory(0, f)

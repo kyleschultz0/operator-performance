@@ -18,7 +18,19 @@ q = {th1,th2};
 plotworkspace(DH,q)
 hold on
 
-xc = -0.08; yc = -0.15; size = 0.39;    % center and size of square
+%% Rectangular workspace
+
+xpos = [-0.5 -0.1 0.25 -0.2];
+ypos = [-0.15 -0.15 0.48 0.48];
+
+% wrap-around for closed region
+xpos(5) = xpos(1);
+ypos(5) = ypos(1);
+
+plot(xpos, ypos, 'LineWidth',2,'color','g')
+
+%% Square workspace
+xc = -0.1; yc = -0.17; size = 0.37;    % center and size of square
 
 plot([xc, xc, xc - size, xc - size, xc],....
      [yc, yc + size, yc + size, yc, yc],'LineWidth',2,'color','k')

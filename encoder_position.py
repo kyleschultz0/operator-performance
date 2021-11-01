@@ -12,7 +12,7 @@ L1 = 0.285
 L2 = 0.265
 #======#
 
-workspace_size = 0.15
+workspace_size = 0.37
 
 def calculate_encoder_position(arduino, offset):
     theta = get_encoder_feedback(arduino, num_encoders=2)
