@@ -23,11 +23,9 @@ L1 = 0.285
 L2 = 0.265
 #======#
 
-workspace_size = 0.37
-
 type = "hebi"
 
-def calculate_hebi_position(group, hebi_feedback, offset):
+def calculate_hebi_position(group, hebi_feedback, offset, workspace_size = 0.37):
     pos_scale = window_size/workspace_size
     theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)
     pos = pos_scale*np.array([-L1*np.sin(theta[0]) - L2*np.cos(theta[0]+theta[1]), L1*np.cos(theta[0])-L2*np.sin(theta[0]+theta[1])])

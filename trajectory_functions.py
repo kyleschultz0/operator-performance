@@ -64,7 +64,7 @@ def trajectory_size(f):
 
 # to test functions:
 if __name__ == "__main__":
-    f = 0.01
+    f = 0.02
     T = 1/f
     t = np.linspace(0, T, 1000)
     pos = trajectory(t, f)
