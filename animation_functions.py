@@ -63,8 +63,8 @@ def create_animation_canvas(window):
   # replace with arbitrary trajectory follower
   # why isnt it centered?
   circle_linew = 2
-  add_circle(450, 450, 400+circle_linew/2, canvas, "white")
-  add_circle(450, 450, 400-circle_linew/2, canvas, "black")
+  add_circle(window_size/2, window_size/2, window_size/2-100+circle_linew/2, canvas, "white")
+  add_circle(window_size/2, window_size/2, window_size/2-100-circle_linew/2, canvas, "black")
   return canvas
 
 

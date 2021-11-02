@@ -38,7 +38,7 @@ def max_vel(f):
     return t_max, vel_max
   
 def screen_trajectory(t, f):
-    return np.round(window_size/2 - 50 + (window_size/2 - 100)*trajectory(t, f))
+    return np.round(np.array([1, 1])*window_size/2 + (window_size/2 - 100)*trajectory(t, f))
 
 def trajectory_size(f):
     T = 1/f

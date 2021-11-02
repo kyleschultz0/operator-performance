@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 
 
 #=== Change these to gather trials ===#
-#type = "hebi"
+type = "hebi"
 #type = "controller"
-type = "encoder"
+#type = "encoder"
 backlash_compensation = False
 include_GPR = False
 model_number = '1'
