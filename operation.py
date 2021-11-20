@@ -20,7 +20,7 @@ model_number = '1'
 f = 0.025 # default: 0.025
 T = 1/f
 
-user_cutoff_freq = 0.5G
+user_cutoff_freq = 0.5
 Kp = [50.0, 40.0] # [Kp1, Kp2]
 
 # hammerstein inverse parameters
