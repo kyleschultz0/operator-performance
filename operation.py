@@ -6,27 +6,33 @@ from controller_functions import *
 from trajectory_functions import max_vel, screen_trajectory
 from numpy import pi, sin, cos
 from os import path
-from backlash_functions import smooth_backlash_inverse, load_GPR_param_models, initialize_backlash
+from backlash_functions import smooth_backlash_inverse, load_GPR_param_models, initialize_backlash, inverse_hammerstein
 import matplotlib.pyplot as plt
 
 
 #=== Change these to gather trials ===#
-type = "hebi"
+#type = "hebi"
 #type = "controller"
-#type = "encoder"
-backlash_compensation = False
+type = "encoder"
+backlash_compensation = True
 include_GPR = False
 model_number = '1'
-f = 0.05 # default: 0.025
+f = 0.025 # default: 0.025
 T = 1/f
 
-# backlash compensation parameters
-user_cutoff_freq = 5.0
-bl_cutoff_freq = 0.5
+user_cutoff_freq = 0.5
 Kp = [50.0, 40.0] # [Kp1, Kp2]
-c_R = [0.02275, 0.043848]
-c_L = [0.18483, 0.314722]
-m = [0.97676, 0.97014]
+
+# hammerstein inverse parameters
+c_bl = [-0.0572, -0.1487]
+K_bl = 0.9803
+tau_bl = [0.1, 0.1]
+
+# smooth inverse parameters
+#bl_cutoff_freq = 0.5
+#c_R = [0.02275, 0.043848]
+#c_L = [0.18483, 0.314722]
+#m = [0.97676, 0.97014]
 
 
 #=== Global variables ===#
@@ -121,12 +127,14 @@ if __name__ == "__main__":
 
         if backlash_compensation: 
             K_gain = 0.45
-            K_gain = 1.0
+            K_gain = 1.3
         else: 
             K_gain = 0.50
-            K_gain = 1.0
-        K = K_gain*(1/window_size)*vel_max*np.matrix([[1, 0],
-                                                      [0, 1]]) # gain was 0.3 with joystick
+            K_gain = 1.3
+
+        workspace_size = 0.37
+        K = K_gain*(workspace_size/window_size)*vel_max*np.matrix([[1, 0],
+                                                                   [0, 1]]) # gain was 0.3 with joystick
         #K = np.matrix([[0.02, 0],
         #               [0, 0.02]])
         print("Gain matrix:", K)
@@ -182,10 +190,13 @@ if __name__ == "__main__":
     rmse_sum = 0
 
     if type == "encoder" or type == "hebi" and backlash_compensation:
+        #theta_init, _, _, _ = get_hebi_feedback(group, hebi_feedback)  
+        #theta_init = np.array(theta_init)
+        #c_init = np.array(c_R)
+        #human_theta_d = initialize_backlash(c_init, m, theta_init)
+
         theta_init, _, _, _ = get_hebi_feedback(group, hebi_feedback)  
-        theta_init = np.array(theta_init)
-        c_init = np.array(c_R)
-        human_theta_d = initialize_backlash(c_init, m, theta_init)
+        human_theta_d = np.array(theta_init) - c_bl[1] # initialize backlash
 
     while True:
        count += 1
@@ -211,7 +222,8 @@ if __name__ == "__main__":
             else:
                 omega_f = user_input_filter(omega_d, cutoff_freq=user_cutoff_freq, T=Tw)
                 human_theta_d += omega_f * Tw
-                theta_d = smooth_backlash_inverse(human_theta_d, omega_f, GPR_models=GPR_models, c_R=c_R, c_L=c_L, m=m, cutoff_freq=bl_cutoff_freq)
+                #theta_d = smooth_backlash_inverse(human_theta_d, omega_f, GPR_models=GPR_models, c_R=c_R, c_L=c_L, m=m, cutoff_freq=bl_cutoff_freq)
+                theta_d = inverse_hammerstein(human_theta_d, omega_f, GPR_models=GPR_models, c=c_bl, K=K_bl, tau=tau_bl)
                 e_d = P_controller(theta, theta_d, Kp)
                 command.effort = e_d
                 group.send_command(command)

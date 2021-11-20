@@ -14,6 +14,9 @@ def get_axis(joystick):
     joystick.init()
     pygame.event.get()
     axis = np.array([joystick.get_axis(0), joystick.get_axis(1)])
+    mag = np.sqrt(np.sum(np.square(axis)))
+    if mag > 1:
+        axis = axis/mag
     return axis
 
 
