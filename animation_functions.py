@@ -1,24 +1,15 @@
 import tkinter
 from time import time, sleep
 import numpy as np
-from trajectory_functions import screen_trajectory
+from trajectory_functions import Trajectory
 
-
-f = 0.1
-# curve frequency
-T = 60
-
-window_size = 1000
-# width of the animation window
-animation_window_width = window_size
-# height of the animation window
-animation_window_height = window_size
-# radius of the ball
-target_ball_radius = 10
-# radius of the encoder ball
+preview_time = 2    # time window of trajectory preview
+T = 60      # time period of trajectory 
+window_size = 600   # size of (square) animation window
+animation_window_width = window_size    # width of the animation window
+animation_window_height = window_size   # height of the animation window
+target_ball_radius = 10  
 input_ball_radius = 5
-# delay between successive frames in seconds
-animation_refresh_seconds = 0.01
 
 class Ball:
     def __init__(self, position, radius, color, canvas):
@@ -46,61 +37,50 @@ def create_animation_window():
   window.geometry(f'{animation_window_width}x{animation_window_height}')
   return window
  
-# create circle on Tk canvas:
-def add_circle(x, y, r, canvasName, color="white"): #center coordinates, radius, canvas, color
-    x0 = x - r
-    y0 = y - r
-    x1 = x + r
-    y1 = y + r
-    return canvasName.create_oval(x0, y0, x1, y1, fill=color)
 
 # Create a canvas for animation and add it to main window
 def create_animation_canvas(window):
   canvas = tkinter.Canvas(window)
   canvas.configure(bg="black")
   canvas.pack(fill="both", expand=True)
-
-  # replace with arbitrary trajectory follower
-  # why isnt it centered?
-  #circle_linew = 2
-  #add_circle(450, 450, 400+circle_linew/2, canvas, "white")
-  #add_circle(450, 450, 400-circle_linew/2, canvas, "black")
   return canvas
 
-def draw_preview(canvas, t):
-    num = 100
-    window = 1.5
-    t_prev = np.linspace(t, t + window, num)
-    traj = screen_trajectory(t_prev, 1)
+def draw_preview(canvas, trajectory, preview_time, T, t):
+    num = 10
+    if t < T - preview_time:
+        prev_end = t + preview_time
+    else:
+        prev_end = T
+
+    t_prev = np.linspace(t, prev_end, num)
+    traj = trajectory.screen_coordinates(t_prev)
     line_array = []
-    for i in range(1,num):
+    for i in range(0,num-1):
         line_array += [traj[0, i], traj[1, i]]
-
-
-    return line_array
+    animation_canvas.coords(line, line_array)
+    print("Start coordinate:", trajectory.screen_coordinates(t))
+    print("Line array:", line_array)
+    return
 
 if __name__ == "__main__":
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
-    pos = screen_trajectory(0, f)
+    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true')
 
+    trajectory = Trajectory("circle", 60, None, window_size)
+    pos = trajectory.screen_coordinates(0)
     target_ball = Ball(pos, target_ball_radius, "red", animation_canvas)
     input_ball = Ball(pos, input_ball_radius, "white", animation_canvas)
     animation_window.update()
-    sleep(10)
+
     t0 = time()
 
-    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth = 'true')
     while True:
         t = time() - t0
-        pos = screen_trajectory(t, f)
-        target_ball.move(pos)
-        if t < 58.5:
-            line_array = draw_preview(animation_canvas, t)
-        animation_canvas.coords(line, line_array)
+        draw_preview(animation_canvas, trajectory, preview_time, T, t)
+        target_ball.move(trajectory.screen_coordinates(t))
         animation_window.update()
-
         if t > (T):
             print("Stopping: trajectory completed")
             break

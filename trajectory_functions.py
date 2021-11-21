@@ -1,107 +1,92 @@
 import numpy as np
 import matplotlib.pyplot as plt
-window_size = 1000
-T = 60
 
-def trajectory(t, f, type):
+class Trajectory:
 
-    if type == "lissajous":
-        #=== Lissajous variables ===#
-        a = 2*np.pi
-        a_per_b = 0.5
-        b = a/a_per_b
-        d = np.pi/4
-        #xd = np.sin(a*f*t+d)
-        #yd = np.cos(b*f*t)
+    def __init__(self, shape, T, f, window_size):
+        self.shape = shape
+        self.T = T
+        self.f = f
+        self.window_size = window_size
 
-    if type == "circle":
-        #=== Circle Variables ===#
-        w = 2*np.pi*f
-        xd = np.cos(w*t)
-        yd = np.sin(w*t)
+    def coordinates(self, t):
+        if self.shape == "lissajous":
+            #== Lissajous variables ==#
+            a = 2*np.pi
+            a_per_b = 0.5
+            b = a/a_per_b
+            d = np.pi/4
+            #=========================#
+
+            xd = np.sin(a*f*t+d)
+            yd = np.cos(b*f*t)
+
+        if self.shape == "circle":
+            #== Circle variables ==#
+            w = 2*np.pi*self.f
+            #======================#
+
+            xd = np.cos(w*t)
+            yd = np.sin(w*t)
     
-    if type == "chirp":
-        f0 = 0.001
-        f1 = 0.1
-        fa = f0 + (f1 - f0) * t / T
-        fb = f1 - (f1 - f0) * t / T
-        xd = np.cos(np.pi*fa*t)
-        yd = np.cos(np.pi*fb*(T-t))
+        if self.shape == "chirp":
+            #== Chirp variables ==#
+            f0 = 0.001
+            f1 = 0.1
+            #=====================#
+            fa = f0 + (f1 - f0) * t / self.T
+            fb = f1 - (f1 - f0) * t / self.T
+            xd = np.cos(np.pi*fa*t)
+            yd = np.cos(np.pi*fb*(self.T-t))
 
-    pos = np.array([xd, yd])
-    return pos
+        return np.array([xd, yd])          
 
+    def screen_coordinates(self, t):
+        return self.window_size/2 - 50 + (self.window_size/2 - 100)*self.coordinates(t)
 
+    def max_vel(self):
+        # Compute maximum velocity of trajectory in pixels
+        dt = 0.001
+        t = 0
+        r0 = self.screen_coordinates(0)
+        vel_max = 0
+        while t < self.T-dt:
+            t += dt
+            drdt = (self.screen_coordinates(t) - r0)/dt
+            vel = np.sqrt(np.sum(np.square(drdt)))
+            r0 = self.screen_coordinates(t)
+            if vel > vel_max:
+                vel_max = vel
+                t_max = t
 
-def max_vel(f):
-    T = 1/f
-    dt = 0.001
-    t = 0
-    r0 = trajectory(0, f, "chirp")
-    vel_max = 0
-    while t < T-dt:
-        t += dt
-        drdt = (trajectory(t, f, "chirp") - r0)/dt
-        vel = np.sqrt(np.sum(np.square(drdt)))
-        r0 = trajectory(t, f, "chirp")
-        if vel > vel_max:
-            vel_max = vel
-            t_max = t
-    vel_max = (window_size/2 - 100)*vel_max
-    return t_max, vel_max
-  
-def screen_trajectory(t, f):
-    return np.round(window_size/2 - 50 + (window_size/2 - 100)*trajectory(t, f, "chirp"))
-
-def trajectory_size(f):
-    T = 1/f
-    dt = 0.001
-    t = 0
-    xmin = ymin = ymax = xmax = 0
-    while t < T-dt:
-        t += dt
-        pos = screen_trajectory(t, f)
-        x = pos[0]
-        y = pos[1]
-        if x > xmax:
-            xmax = x
-        if y > ymax:
-            ymax = y
-        if x < xmin:
-            xmin = x
-        if y < ymin:
-            ymin = y
-    center = np.array([xmax - xmin, ymax - ymin])/2
-    return center
-
+        return t_max, vel_max
 
 # to test functions:
 if __name__ == "__main__":
-    f = 0.01
-    T = 1/f
     T = 60
+    window_size = 1000
+
+    trajectory = Trajectory("chirp", T, None, window_size)
+
     t = np.linspace(0, T, 1000)
-    pos = trajectory(t, f, "chirp")
-    pos_screen = screen_trajectory(t, f)
+    coords = trajectory.coordinates(t)
+    screen_coords = trajectory.screen_coordinates(t)
 
-
-    #t_max, vel_max = max_vel(f)
-    #print("Max velocity:", vel_max)
-    #print("Time of max velocity:", t_max)
-    #center = trajectory_size(f)
-    #print(center)
+    t_max, vel_max = trajectory.max_vel()
+    print("Max velocity:", vel_max)
+    print("Time of max velocity:", t_max)
 
     plot1 = plt.figure(1)
-    plt.plot(pos[0, :], pos[1, :])
+    plt.plot(coords[0, :], coords[1, :])
 
     plot2 = plt.figure(2)
-    plt.plot(t, pos[0, :])
+    plt.plot(t, coords[0, :])
    
     plot3 = plt.figure(3)
-    plt.plot(t, pos[1, :])
+    plt.plot(t, coords[1, :])
 
     plot4 = plt.figure(4)
-    plt.plot(pos_screen[0, :], pos_screen[1, :])
+    plt.plot(screen_coords[0, :], screen_coords[1, :])
 
 
     plt.show()
