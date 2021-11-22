@@ -23,6 +23,7 @@ class Trajectory:
 
         if self.shape == "circle":
             #== Circle variables ==#
+            print("f:", self.f)
             w = 2*np.pi*self.f
             #======================#
 
@@ -65,8 +66,9 @@ class Trajectory:
 if __name__ == "__main__":
     T = 60
     window_size = 1000
+    f = 0.1
 
-    trajectory = Trajectory("chirp", T, None, window_size)
+    trajectory = Trajectory("chirp", T, f, window_size)
 
     t = np.linspace(0, T, 1000)
     coords = trajectory.coordinates(t)

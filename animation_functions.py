@@ -5,7 +5,7 @@ from trajectory_functions import Trajectory
 
 preview_time = 2    # time window of trajectory preview
 T = 60      # time period of trajectory 
-window_size = 600   # size of (square) animation window
+window_size = 1000   # size of (square) animation window
 animation_window_width = window_size    # width of the animation window
 animation_window_height = window_size   # height of the animation window
 target_ball_radius = 10  
@@ -30,6 +30,7 @@ class Ball:
                       self.pos[1]-self.radius,
                       self.pos[0]+self.radius,
                       self.pos[1]+self.radius)
+        return position
 
 def create_animation_window():
   window = tkinter.Tk()
@@ -45,7 +46,7 @@ def create_animation_canvas(window):
   canvas.pack(fill="both", expand=True)
   return canvas
 
-def draw_preview(canvas, trajectory, preview_time, T, t):
+def draw_preview(canvas, line, trajectory, preview_time, T, t):
     num = 10
     if t < T - preview_time:
         prev_end = t + preview_time
@@ -57,18 +58,16 @@ def draw_preview(canvas, trajectory, preview_time, T, t):
     line_array = []
     for i in range(0,num-1):
         line_array += [traj[0, i], traj[1, i]]
-    animation_canvas.coords(line, line_array)
-    print("Start coordinate:", trajectory.screen_coordinates(t))
-    print("Line array:", line_array)
+    canvas.coords(line, line_array)
     return
 
 if __name__ == "__main__":
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
-    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true')
+    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
-    trajectory = Trajectory("circle", 60, None, window_size)
+    trajectory = Trajectory("chirp", 60, None, window_size)
     pos = trajectory.screen_coordinates(0)
     target_ball = Ball(pos, target_ball_radius, "red", animation_canvas)
     input_ball = Ball(pos, input_ball_radius, "white", animation_canvas)
@@ -78,7 +77,7 @@ if __name__ == "__main__":
 
     while True:
         t = time() - t0
-        draw_preview(animation_canvas, trajectory, preview_time, T, t)
+        draw_preview(animation_canvas, line, trajectory, preview_time, T, t)
         target_ball.move(trajectory.screen_coordinates(t))
         animation_window.update()
         if t > (T):

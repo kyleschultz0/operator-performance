@@ -3,7 +3,7 @@ from hebi_functions import initialize_hebi, get_hebi_feedback, send_hebi_positio
 from encoder_position import calculate_encoder_position
 from encoder_functions import initialize_encoders
 from controller_functions import *
-from trajectory_functions import max_vel, screen_trajectory
+from trajectory_functions import Trajectory
 from numpy import pi, sin, cos
 from os import path
 from backlash_functions import smooth_backlash_inverse, load_GPR_param_models, initialize_backlash, inverse_hammerstein
@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 
 
 #=== Change these to gather trials ===#
-#type = "hebi"
-#type = "controller"
+# type = "hebi"
+# type = "controller"
 type = "encoder"
-backlash_compensation = True
+backlash_compensation = False
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
-T = 1/f
+T = 60
 
 user_cutoff_freq = 0.5
 Kp = [50.0, 40.0] # [Kp1, Kp2]
@@ -106,11 +106,12 @@ def calculate_velocity(theta, joystick, K):
 if __name__ == "__main__":
 
     joystick = initialize_joystick()
-    t_max, vel_max = max_vel(f)
     output = []
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
+    trajectory = Trajectory("chirp", 60, None, window_size)
+    t_max, vel_max = trajectory.max_vel()
 
     if backlash_compensation:
         if include_GPR:
@@ -134,7 +135,7 @@ if __name__ == "__main__":
 
         workspace_size = 0.37
         K = K_gain*(workspace_size/window_size)*vel_max*np.matrix([[1, 0],
-                                                                   [0, 1]]) # gain was 0.3 with joystick
+                                                                                [0, 1]]) # gain was 0.3 with joystick
         #K = np.matrix([[0.02, 0],
         #               [0, 0.02]])
         print("Gain matrix:", K)
@@ -150,8 +151,10 @@ if __name__ == "__main__":
         theta2i = 1.0694
         set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
 
-    pos_i = screen_trajectory(0, f)
+    pos_i = trajectory.screen_coordinates(0)
     target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
+
+    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
     if type == "controller":
         gain = vel_max
@@ -172,6 +175,7 @@ if __name__ == "__main__":
         offset = pos_i - pos0
         input_ball = Ball(calculate_encoder_position(arduino, offset), input_ball_radius, "white", animation_canvas)
     
+    draw_preview(animation_canvas, line, trajectory, preview_time, T, 0)
     animation_window.update()
 
     print("Get ready...")
@@ -228,7 +232,9 @@ if __name__ == "__main__":
                 command.effort = e_d
                 group.send_command(command)
 
-       pos = screen_trajectory(t, f)
+
+       draw_preview(animation_canvas, line, trajectory, preview_time, T, t)
+       pos = target_ball.move(trajectory.screen_coordinates(t))
        target_ball.move(pos)
 
        input_ball.move(pos_input)
