@@ -146,9 +146,15 @@ if __name__ == "__main__":
         group_info = group.request_info()
         if group_info is not None:
             group_info.write_gains("csv/saved_gains.xml")
-        
-        theta1i = 0.2827
-        theta2i = 1.0694
+        if type == "circle":
+            theta1i = 0.2827
+            theta2i = 1.0694
+
+        if type == "chirp":
+            theta1i = 1.3728
+            theta2i = 0.8586
+
+
         set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
 
     pos_i = trajectory.screen_coordinates(0)

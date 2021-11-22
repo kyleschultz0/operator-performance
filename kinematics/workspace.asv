@@ -38,8 +38,8 @@ plot([xc, xc, xc - size, xc - size, xc],....
  
 trajOffx = (window_size/2-100)/window_size*size;
 
-xi = xc - size/2 + size/2.2;
-yi = yc + size/2 - size/2.2;
+xi = xc - size/2 + trajOffx;
+yi = yc + size/2;
 plot(xi, yi, "b*",'LineWidth',2)
 
  
@@ -71,7 +71,7 @@ tmp_th2 = TH2_MLF{1}(L1,L2,xi,yi)
 
 T = 60;
 t_step = 0.01;
-t = 0:t_step:10;
+t = 0:t_step:T;
 
 type = "chirp";
 
@@ -91,8 +91,8 @@ if type == "chirp"
     f1 = 0.1;
     fa = f0 + (f1 - f0) * t / T;
     fb = f1 - (f1 - f0) * t / T;
-    x = size/2.2.*cos(pi.*fa.*t) + xi - size/2.2;
-    y = yi - size/2.2.*cos(pi.*fb.*(T-t)) + size/2.2;
+    x = size/2.2.*cos(pi.*fa.*t) + xc - size/2;
+    y = size/2.2.*cos(pi.*fb.*(T-t)) + yc + size/2;
 end
     
     
