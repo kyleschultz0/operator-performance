@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 # type = "hebi"
 # type = "controller"
 type = "encoder"
+trajectory_type = "chirp"
 backlash_compensation = False
 include_GPR = False
 model_number = '1'
@@ -110,7 +111,7 @@ if __name__ == "__main__":
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
-    trajectory = Trajectory("chirp", 60, None, window_size)
+    trajectory = Trajectory(trajectory_type, 60, None, window_size)
     t_max, vel_max = trajectory.max_vel()
 
     if backlash_compensation:
@@ -146,11 +147,11 @@ if __name__ == "__main__":
         group_info = group.request_info()
         if group_info is not None:
             group_info.write_gains("csv/saved_gains.xml")
-        if type == "circle":
+        if trajectory_type == "circle":
             theta1i = 0.2827
             theta2i = 1.0694
 
-        if type == "chirp":
+        if trajectory_type == "chirp":
             theta1i = 1.3728
             theta2i = 0.8586
 
