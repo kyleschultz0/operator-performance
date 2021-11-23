@@ -85,14 +85,20 @@ def smooth_backlash_inverse(theta, omega, GPR_models=None,
     return theta_d_hebi   
 
 def inverse_hammerstein(theta_d, omega_d, GPR_models=None,
-                        c=[0,0], K=1.0, tau=[0,0]):
+                        c=[0,0,0,0], K=[1.0, 1.0], tau=[0,0,0,0]):
     theta_d_hebi = np.copy(theta_d)
     if omega_d[0] > 0:
-        theta_d_hebi[0] = (tau[0]*omega_d[0] + theta_d_hebi[0]) / K
+        theta_d_hebi[0] = (tau[0]*omega_d[0] + theta_d_hebi[0]) / K[0]
         theta_d_hebi[0] += c[0]
     elif omega_d[0] < 0:
-        theta_d_hebi[0] = (tau[1]*omega_d[0] + theta_d_hebi[0]) / K
+        theta_d_hebi[0] = (tau[1]*omega_d[0] + theta_d_hebi[0]) / K[0]
         theta_d_hebi[0] += c[1]
+    if omega_d[1] > 0:
+        theta_d_hebi[1] = (tau[2]*omega_d[1] + theta_d_hebi[1]) / K[1]
+        theta_d_hebi[1] += c[2]
+    elif omega_d[1] < 0:
+        theta_d_hebi[1] = (tau[3]*omega_d[1] + theta_d_hebi[1]) / K[1]
+        theta_d_hebi[1] += c[3]
     return theta_d_hebi
 
 

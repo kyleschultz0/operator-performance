@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 # type = "controller"
 type = "encoder"
 trajectory_type = "chirp"
-backlash_compensation = False
+backlash_compensation = True
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
@@ -25,9 +25,9 @@ user_cutoff_freq = 0.5
 Kp = [50.0, 40.0] # [Kp1, Kp2]
 
 # hammerstein inverse parameters
-c_bl = [-0.0572, -0.1487]
-K_bl = 0.9803
-tau_bl = [0.1, 0.1]
+c_bl = [-0.0572, -0.1487, -0.0702, -0.2219]
+K_bl = [0.9803, 0.9748]
+tau_bl = [0.1, 0.1, 0.26, 0.38]
 
 # smooth inverse parameters
 #bl_cutoff_freq = 0.5
@@ -67,12 +67,16 @@ def user_input_filter(omega, cutoff_freq=1.0, T=0.01):
     return np.array([O1,O2])
 
 def save_data(output):
+    if backlash_compensation:
+        comp = "compensated"
+    else:
+        comp = "uncompensated"
     fs = str(f)
     f_r = fs.replace('.', '')
-    save_name = "csv/{}_{}_1.csv".format(type, f_r)
+    save_name = "csv/{}_{}_{}_1.csv".format(type, f_r, comp)
     for i in range(2, 100):
         if path.exists(save_name) is True:
-            save_name = "csv/{}_{}_{}.csv".format(type, f_r, i)
+            save_name = "csv/{}_{}_{}_{}.csv".format(type, f_r, comp, i)
         else:
             break
 
@@ -278,6 +282,7 @@ if __name__ == "__main__":
            break
 
        if keyboard.is_pressed('esc'):
+           save_data(output)
            print("Trajectory interupted")
            #break
            while True:
