@@ -40,6 +40,17 @@ class Trajectory:
             xd = np.cos(np.pi*fa*t)
             yd = np.cos(np.pi*fb*(self.T-t))
 
+        if self.shape == "chirp2":
+            #== Chirp variables ==#
+            f0 = 0.001
+            f1 = 0.1
+            #=====================#
+            fa = f0 + (f1 - f0) * t / self.T
+            xd = np.cos(np.pi*fa*t)
+            yd = np.cos(np.pi*fa*t)
+            
+            
+
         return np.array([xd, yd])          
 
     def screen_coordinates(self, t):
@@ -64,7 +75,7 @@ class Trajectory:
 
 # to test functions:
 if __name__ == "__main__":
-    T = 60
+    T = 120
     window_size = 1000
     f = 0.1
 

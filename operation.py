@@ -11,17 +11,19 @@ import matplotlib.pyplot as plt
 
 
 #=== Change these to gather trials ===#
-# type = "hebi"
+preview_time = 0
+oneD = False
+type = "hebi"
 # type = "controller"
-type = "encoder"
-trajectory_type = "chirp"
-backlash_compensation = True
+# type = "encoder"
+trajectory_type = "chirp2"
+backlash_compensation = False
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
-T = 60
+T = 120
 
-user_cutoff_freq = 0.5
+user_cutoff_freq = 0.75
 Kp = [50.0, 40.0] # [Kp1, Kp2]
 
 # hammerstein inverse parameters
@@ -103,10 +105,11 @@ def calculate_velocity(theta, joystick, K):
        Jinv = np.matrix([[-cos(theta1 + theta2)/(L1*cos(theta2)), -sin(theta1 + theta2)/(L1*cos(theta2))],
                          [(L2*cos(theta1 + theta2) + L1*sin(theta1))/(L1*L2*cos(theta2)), (L2*sin(theta1 + theta2) - L1*cos(theta1))/(L1*L2*cos(theta2))]])
        # print("Jinv:", Jinv)
+       vel_d = K @ axis
        omega_d = Jinv @ K @ axis
        omega_d = np.squeeze(np.asarray(omega_d))
 
-       return omega_d
+       return omega_d, vel_d
 
 if __name__ == "__main__":
 
@@ -127,22 +130,9 @@ if __name__ == "__main__":
 
     if type == "hebi" or type == "encoder":
 
-        # gains:
-        #   0.23 backlash comp joystick f=0.025
-        #   0.6 no backlash comp joystick f=0.025
-
-        if backlash_compensation: 
-            K_gain = 0.45
-            K_gain = 1.3
-        else: 
-            K_gain = 0.50
-            K_gain = 1.3
-
+        K_gain = 2
         workspace_size = 0.37
-        K = K_gain*(workspace_size/window_size)*vel_max*np.matrix([[1, 0],
-                                                                                [0, 1]]) # gain was 0.3 with joystick
-        #K = np.matrix([[0.02, 0],
-        #               [0, 0.02]])
+        K = K_gain*(workspace_size/window_size)*vel_max*np.matrix([[1, 0], [0, 1]])
         print("Gain matrix:", K)
         freq = 100 # hz
         group, hebi_feedback, command = initialize_hebi()
@@ -155,7 +145,7 @@ if __name__ == "__main__":
             theta1i = 0.2827
             theta2i = 1.0694
 
-        if trajectory_type == "chirp":
+        if trajectory_type == "chirp" or trajectory_type == "chirp2":
             theta1i = 1.3728
             theta2i = 0.8586
 
@@ -168,7 +158,7 @@ if __name__ == "__main__":
     line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
     if type == "controller":
-        gain = vel_max
+        gain = 2*vel_max
         print(gain)
         input_ball = Ball(pos_i, input_ball_radius, "white", animation_canvas)
         pos_input = pos_i
@@ -229,8 +219,7 @@ if __name__ == "__main__":
 
        if type == "hebi" or type == "encoder":
             theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)  
-            omega_d = calculate_velocity(theta, joystick, K)
-            
+            omega_d, vel_d = calculate_velocity(theta, joystick, K)
             if not backlash_compensation:
                 command.velocity = omega_d
                 group.send_command(command)
@@ -243,6 +232,9 @@ if __name__ == "__main__":
                 command.effort = e_d
                 group.send_command(command)
 
+       #if oneD:
+       #    pos_input[1] = 500;
+
 
        draw_preview(animation_canvas, line, trajectory, preview_time, T, t)
        pos = target_ball.move(trajectory.screen_coordinates(t))
@@ -252,7 +244,10 @@ if __name__ == "__main__":
        animation_window.update()
        error = np.sqrt(np.sum(np.square(pos-pos_input)))
        rmse_sum += np.sum(np.square(pos-pos_input))
-       output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
+       if type == "controller":
+           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
+       else:
+           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], vel_d[0,0], vel_d[0,1], error]]
 
        if i == 0:
            print("Ready to operate...")
@@ -272,8 +267,11 @@ if __name__ == "__main__":
            plt.xlabel('Time [s]')
            plt.ylabel('Position [pixels]')
            plt.title('Position')
-           plt.figure()
-           plt.plot(output[:, 0], output[:, 5])
+           plt.figure
+           if type == "controller":
+               plt.plot(output[:, 0], output[:, 6])
+           else:
+               plt.plot(output[:, 0], output[:, 7])
            plt.xlabel('Time [s]')
            plt.ylabel('Position Error [pixels]')
            plt.title('Error (Total RMSE='+str(round(rmse))+' Pixels)')

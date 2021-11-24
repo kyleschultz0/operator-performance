@@ -3,8 +3,8 @@ from time import time, sleep
 import numpy as np
 from trajectory_functions import Trajectory
 
-preview_time = 2    # time window of trajectory preview
-T = 60      # time period of trajectory 
+preview_time = 1   # time window of trajectory preview
+T = 100      # time period of trajectory 
 window_size = 1000   # size of (square) animation window
 animation_window_width = window_size    # width of the animation window
 animation_window_height = window_size   # height of the animation window
