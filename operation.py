@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 #=== Change these to gather trials ===#
 preview_time = 0
 oneD = False
-type = "hebi"
-# type = "controller"
+# type = "hebi"
+type = "controller"
 # type = "encoder"
 trajectory_type = "chirp2"
 backlash_compensation = False
@@ -269,7 +269,7 @@ if __name__ == "__main__":
            plt.title('Position')
            plt.figure
            if type == "controller":
-               plt.plot(output[:, 0], output[:, 6])
+               plt.plot(output[:, 0], output[:, 5])
            else:
                plt.plot(output[:, 0], output[:, 7])
            plt.xlabel('Time [s]')
@@ -283,8 +283,10 @@ if __name__ == "__main__":
            save_data(output)
            print("Trajectory interupted")
            #break
-           while True:
+           while True and type is not "controller":
                command.velocity = np.nan*np.ones(2)
                command.effort = np.zeros(2)
                group.send_command(command)
+           else:
+               break
 
