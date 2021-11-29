@@ -13,15 +13,15 @@ import matplotlib.pyplot as plt
 #=== Change these to gather trials ===#
 preview_time = 0
 oneD = False
-# type = "hebi"
-type = "controller"
+type = "hebi"
+# type = "controller"
 # type = "encoder"
 trajectory_type = "chirp2"
 backlash_compensation = False
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
-T = 120
+T = 80
 
 user_cutoff_freq = 0.75
 Kp = [50.0, 40.0] # [Kp1, Kp2]
@@ -113,12 +113,14 @@ def calculate_velocity(theta, joystick, K):
 
 if __name__ == "__main__":
 
+    print("T:", T)
     joystick = initialize_joystick()
     output = []
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
-    trajectory = Trajectory(trajectory_type, 60, None, window_size)
+    trajectory = Trajectory(trajectory_type, T, None, window_size)
+    print("T in class:", trajectory.T)
     t_max, vel_max = trajectory.max_vel()
 
     if backlash_compensation:
@@ -220,11 +222,13 @@ if __name__ == "__main__":
        if type == "hebi" or type == "encoder":
             theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)  
             omega_d, vel_d = calculate_velocity(theta, joystick, K)
+
+            omega_f = user_input_filter(omega_d, cutoff_freq=user_cutoff_freq, T=Tw)
+
             if not backlash_compensation:
-                command.velocity = omega_d
+                command.velocity = omega_f
                 group.send_command(command)
             else:
-                omega_f = user_input_filter(omega_d, cutoff_freq=user_cutoff_freq, T=Tw)
                 human_theta_d += omega_f * Tw
                 #theta_d = smooth_backlash_inverse(human_theta_d, omega_f, GPR_models=GPR_models, c_R=c_R, c_L=c_L, m=m, cutoff_freq=bl_cutoff_freq)
                 theta_d = inverse_hammerstein(human_theta_d, omega_f, GPR_models=GPR_models, c=c_bl, K=K_bl, tau=tau_bl)
@@ -234,7 +238,6 @@ if __name__ == "__main__":
 
        #if oneD:
        #    pos_input[1] = 500;
-
 
        draw_preview(animation_canvas, line, trajectory, preview_time, T, t)
        pos = target_ball.move(trajectory.screen_coordinates(t))
@@ -247,7 +250,7 @@ if __name__ == "__main__":
        if type == "controller":
            output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
        else:
-           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], vel_d[0,0], vel_d[0,1], error]]
+           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], vel_d[0,0], vel_d[0,1], pos[0], pos[1], error]]
 
        if i == 0:
            print("Ready to operate...")
@@ -271,7 +274,7 @@ if __name__ == "__main__":
            if type == "controller":
                plt.plot(output[:, 0], output[:, 5])
            else:
-               plt.plot(output[:, 0], output[:, 7])
+               plt.plot(output[:, 0], output[:, 9])
            plt.xlabel('Time [s]')
            plt.ylabel('Position Error [pixels]')
            plt.title('Error (Total RMSE='+str(round(rmse))+' Pixels)')

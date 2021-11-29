@@ -3,8 +3,7 @@ from time import time, sleep
 import numpy as np
 from trajectory_functions import Trajectory
 
-preview_time = 1   # time window of trajectory preview
-T = 100      # time period of trajectory 
+preview_time = 1   # time window of trajectory preview  
 window_size = 1000   # size of (square) animation window
 animation_window_width = window_size    # width of the animation window
 animation_window_height = window_size   # height of the animation window
@@ -62,7 +61,7 @@ def draw_preview(canvas, line, trajectory, preview_time, T, t):
     return
 
 if __name__ == "__main__":
-
+    T = 100
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
     line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))

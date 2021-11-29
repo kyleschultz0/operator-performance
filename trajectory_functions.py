@@ -43,7 +43,7 @@ class Trajectory:
         if self.shape == "chirp2":
             #== Chirp variables ==#
             f0 = 0.001
-            f1 = 0.1
+            f1 = 0.2
             #=====================#
             fa = f0 + (f1 - f0) * t / self.T
             xd = np.cos(np.pi*fa*t)
