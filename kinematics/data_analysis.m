@@ -1,11 +1,7 @@
 clc; clear all; close all
 
 
-controller = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\controller_0025_uncompensated_1.csv");
-hebi = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\hebi_0025_uncompensated_1.csv");
-encoder_uncomp = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\encoder_0025_uncompensated_1.csv");
-encoder_comp = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\encoder_0025_compensated_1.csv");
-hebi_vel = importfile2("C:\Users\Kyle\source\repos\hebi-performance\csv\hebi_0025_uncompensated_6.csv");
+hebi_vel = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\OldData\hebi_0025_uncompensated_6.csv");
 
 
 
@@ -23,14 +19,29 @@ title("Error Between Desired and Actual Ouput")
 xlabel("Time (s)")
 ylabel("Distance (pixels")
 
+t = hebi_vel.t;
+
+%% Computing true velocity (red dot)
+
+T = 120;
+window_size = 1000;
+f = 0.1;
+
+f0 = 0.001;
+f1 = 0.1;
+
+for i = 1:length(t)
+    fa = f0 + (f1 - f0) * t(i)/T;
+    vdx(i) = pi.*fa.*sin(pi.*fa.*t(i));
+    vdy(i) = -pi.*fa.*sin(pi.*fa.*t(i));
+end
 %% Comparing desired and actual velocity
 
-t = hebi_vel.t;
 
 amp = 1000/0.37;
 
-veld1 = amp*hebi_vel.veld1;
-veld2 = amp*hebi_vel.veld2;
+veld1 = hebi_vel.veld1;
+veld2 = hebi_vel.veld2;
 
 pos1 = [hebi_vel.pos_in1];
 pos2 = [hebi_vel.pos_in2];
@@ -38,12 +49,13 @@ pos2 = [hebi_vel.pos_in2];
 vel1 = diff(pos1)./diff(t);
 vel2 = -diff(pos2)./diff(t);
 
-vel1 = lowpass(vel1, 0.2);
-vel2 = lowpass(vel2, 0.2);
+vel1 = lowpass(vel1, 0.25)/amp;
+vel2 = lowpass(vel2, 0.25)/amp;
 
 figure;
-plot(t(1:end-1), vel1, 'b', t, veld1, 'b--', t(1:end-1), vel2, 'r', t, veld2, 'r--')
-legend("Actual Velocity 1", "Desired Velocity 1", "Actual Velocity 2", "Desired Velocity 2")
+plot(t(1:end-1), vel1, 'b', t, veld1, 'b--', t, vdx, "b*", t(1:end-1), vel2, 'r', t, veld2, 'r--', t, vdy, "r*")
+legend("Actual Velocity 1", "User Desired Velocity 1", "Desired Velocity 1",...
+    "Actual Velocity 2", "User Desired Velocity 2", "Desired Velocity 1")
 
 
 
@@ -162,7 +174,7 @@ xlim([0 1])
 
 %% Function to import data
 
-function data = importfile(filename, dataLines)
+function data = importfilecontrol(filename, dataLines)
 
 %% Input handling
 
@@ -191,7 +203,7 @@ data = readtable(filename, opts);
 
 end
 
-function data = importfile2(filename, dataLines)
+function data = importfile(filename, dataLines)
 
 %% Input handling
 
