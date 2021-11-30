@@ -12,7 +12,7 @@ init2_e2 = 0
 init3_e1 = 0
 init3_e2 = 0
 init_tol1 = 0.15 # rad
-init_tol2 = 0.01 # rad
+init_tol2 = 0.005 # rad
 init_tol3 = 0.02 # rad
  
 # Initialize loop timer previous time:

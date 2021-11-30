@@ -21,7 +21,7 @@ backlash_compensation = False
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
-T = 60
+T = 90
 
 user_cutoff_freq = 0.75
 Kp = [50.0, 40.0] # [Kp1, Kp2]
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     if type == "hebi" or type == "encoder":
 
-        K_gain = 2
+        K_gain = 1.5
         workspace_size = 0.37
         K = K_gain*(workspace_size/window_size)*vel_max*np.matrix([[1, 0], [0, 1]])
         print("Gain matrix:", K)
@@ -222,7 +222,7 @@ if __name__ == "__main__":
        if type == "hebi" or type == "encoder":
             trajectory.coordinates(t)
             # print("trajectory.K", trajectory.K)
-            K = 1*trajectory.K*1*np.matrix([[1, 0], [0, 1]])
+            K = K_gain*trajectory.K*np.matrix([[1, 0], [0, 1]])
             print("New K:", K)
             theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)  
             omega_d, vel_d = calculate_velocity(theta, joystick, K)
