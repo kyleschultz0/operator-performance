@@ -1,7 +1,7 @@
 clc; clear all; close all
 
 
-hebi_vel = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\OldData\hebi_0025_uncompensated_6.csv");
+hebi_vel = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\hebi_0025_uncompensated_6.csv");
 
 
 
@@ -43,6 +43,11 @@ amp = 1000/0.37;
 veld1 = hebi_vel.veld1;
 veld2 = hebi_vel.veld2;
 
+
+pos1d = [hebi_vel.pos1];
+pos2d = [hebi_vel.pos2];
+
+
 pos1 = [hebi_vel.pos_in1];
 pos2 = [hebi_vel.pos_in2];
 
@@ -52,8 +57,12 @@ vel2 = -diff(pos2)./diff(t);
 vel1 = lowpass(vel1, 0.25)/amp;
 vel2 = lowpass(vel2, 0.25)/amp;
 
+vel1d = (diff(pos1d)./diff(t))/amp;
+vel2d = -diff(pos2d)./diff(t)/amp;
+
 figure;
-plot(t(1:end-1), vel1, 'b', t, veld1, 'b--', t, vdx, "b*", t(1:end-1), vel2, 'r', t, veld2, 'r--', t, vdy, "r*")
+plot(t(1:end-1), vel1, 'b', t, veld1, 'b--', t(1:end-1), vel1d, "b.", t(1:end-1),...
+    vel2, 'r', t, veld2, 'r--', t(1:end-1), vel2d, "r.")
 legend("Actual Velocity 1", "User Desired Velocity 1", "Desired Velocity 1",...
     "Actual Velocity 2", "User Desired Velocity 2", "Desired Velocity 1")
 
