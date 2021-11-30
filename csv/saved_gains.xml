@@ -19,7 +19,7 @@
 	</position>
 	<velocity>
 		<kp>0.030000 0.050000</kp>
-		<ki>1.000000 1.000000</ki>
+		<ki>1.750000 1.750000</ki>
 		<kd>0.000000 0.000000</kd>
 		<feed_forward>1.000000 1.000000</feed_forward>
 		<dead_zone>0.000000 0.000000</dead_zone>

@@ -21,7 +21,7 @@ backlash_compensation = False
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
-T = 80
+T = 60
 
 user_cutoff_freq = 0.75
 Kp = [50.0, 40.0] # [Kp1, Kp2]
@@ -220,15 +220,18 @@ if __name__ == "__main__":
            pos_input = calculate_encoder_position(arduino, offset)
 
        if type == "hebi" or type == "encoder":
+            trajectory.coordinates(t)
+            # print("trajectory.K", trajectory.K)
+            K = 1*trajectory.K*1*np.matrix([[1, 0], [0, 1]])
+            print("New K:", K)
             theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)  
             omega_d, vel_d = calculate_velocity(theta, joystick, K)
 
-            omega_f = user_input_filter(omega_d, cutoff_freq=user_cutoff_freq, T=Tw)
-
             if not backlash_compensation:
-                command.velocity = omega_f
+                command.velocity = omega_d
                 group.send_command(command)
             else:
+                omega_f = user_input_filter(omega_d, cutoff_freq=user_cutoff_freq, T=Tw)
                 human_theta_d += omega_f * Tw
                 #theta_d = smooth_backlash_inverse(human_theta_d, omega_f, GPR_models=GPR_models, c_R=c_R, c_L=c_L, m=m, cutoff_freq=bl_cutoff_freq)
                 theta_d = inverse_hammerstein(human_theta_d, omega_f, GPR_models=GPR_models, c=c_bl, K=K_bl, tau=tau_bl)
@@ -250,7 +253,7 @@ if __name__ == "__main__":
        if type == "controller":
            output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
        else:
-           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], vel_d[0,0], vel_d[0,1], pos[0], pos[1], error]]
+           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], vel_d[0,0], vel_d[0,1], error]]
 
        if i == 0:
            print("Ready to operate...")
@@ -261,25 +264,47 @@ if __name__ == "__main__":
            save_data(output)
            output = np.array(output)
            print("Trajectory complete, saving data")
+
+           velm1 = np.diff(output[:,1]*0.00037)/np.diff(output[:,0])
+           velm2 = np.diff(output[:,2]*0.00037)/np.diff(output[:,0])
+
+           velc1 = np.diff(output[:,3]*0.00037)/np.diff(output[:,0])
+           velc2 = np.diff(output[:,4]*0.00037)/np.diff(output[:,0])
+
            plt.figure()
-           plt.plot(output[:, 0], output[:, 1], label = "Actual Position x")
-           plt.plot(output[:, 0], output[:, 2], label = "Actual Position y")
-           plt.plot(output[:, 0], output[:, 3], label = "Desired Position x")
-           plt.plot(output[:, 0], output[:, 4], label = "Desired Position y")
+           plt.plot(output[:,0], output[:,1], label = "Actual Position x")
+           plt.plot(output[:,0], output[:,2], label = "Actual Position y")
+           plt.plot(output[:,0], output[:,3], label = "Desired Position x")
+           plt.plot(output[:,0], output[:,4], label = "Desired Position y")
            plt.legend()
            plt.xlabel('Time [s]')
            plt.ylabel('Position [pixels]')
            plt.title('Position')
-           plt.figure
+
+           plt.figure()
            if type == "controller":
-               plt.plot(output[:, 0], output[:, 5])
+               plt.plot(output[:,0], output[:,5])
            else:
-               plt.plot(output[:, 0], output[:, 9])
+               plt.plot(output[:,0], output[:,7])
            plt.xlabel('Time [s]')
            plt.ylabel('Position Error [pixels]')
            plt.title('Error (Total RMSE='+str(round(rmse))+' Pixels)')
            plt.legend()
+
+           plt.figure()
+           plt.plot(output[1:,0], velc1, 'k--', linewidth=1.0, label="Desired Velocity x")
+           plt.plot(output[1:,0], -velc2, 'm--', linewidth=1.0, label="Desired Velocity y")
+           plt.plot(output[:,0], output[:,5], 'b--', linewidth=1.5, label="User Desired Velocity x")
+           plt.plot(output[:,0], output[:,6], 'r--', linewidth=1.5, label="User Desired Velocity y")
+           plt.plot(output[1:,0], velm1, 'b', linewidth=1.5, label="Motor Velocity x")
+           plt.plot(output[1:,0], -velm2, 'r', linewidth=1.5, label="Motor Velocity y")
+           plt.xlabel('Time [s]')
+           plt.ylabel('Position')
+           plt.title('User Desired vs Actual Velocity')
+           plt.legend()
+
            plt.show()
+
            break
 
        if keyboard.is_pressed('esc'):

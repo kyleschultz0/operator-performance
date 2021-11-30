@@ -8,6 +8,7 @@ class Trajectory:
         self.T = T
         self.f = f
         self.window_size = window_size
+        self.K = 1  # wrong
 
     def coordinates(self, t):
         if self.shape == "lissajous":
@@ -48,6 +49,8 @@ class Trajectory:
             fa = f0 + (f1 - f0) * t / self.T
             xd = np.cos(np.pi*fa*t)
             yd = np.cos(np.pi*fa*t)
+            K = np.sqrt(np.pi*fa**2 + np.pi*fa**2)
+            self.K = K
             
             
 
