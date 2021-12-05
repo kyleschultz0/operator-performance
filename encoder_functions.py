@@ -38,6 +38,13 @@ def get_encoder_feedback(arduino, num_encoders=2, joint_offsets=np.array([3.1584
     theta *= -1
     return theta
 
+def get_encoder_feedback_without_random_offsets(arduino, num_encoders=2, joint_offsets=np.array([1.57, 1.6])):
+    reading = get_reading(arduino)
+    theta = decode_reading(reading, num_encoders=num_encoders)
+    theta -= joint_offsets
+    theta *= -1
+    return theta
+
 def save_data(output):
     np.savetxt("csv/EncoderTest2.csv", np.array(output), delimiter=",")
     print("Data saved")

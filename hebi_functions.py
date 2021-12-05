@@ -31,7 +31,7 @@ def initialize_hebi():
     command = hebi.GroupCommand(num_joints)
     return group, feedback, command
 
-def get_hebi_feedback(group, hebi_feedback, joint_offsets=np.array([-np.pi/2, 0.3]), limit_stop=True, limits=np.array([np.pi+0.09, 2*np.pi-0.09])):
+def get_hebi_feedback(group, hebi_feedback, joint_offsets=np.array([-np.pi/2, 0.3])):
     # joint_offsets - set in radians to change x/y position [rotation from hebi x, rotation from hebi y]
     # limit_stop currently limits position of both joints the same [lower limit, higher limit] in radians
     limit_stop_flag = False
@@ -41,9 +41,18 @@ def get_hebi_feedback(group, hebi_feedback, joint_offsets=np.array([-np.pi/2, 0.
     torque = np.array(hebi_feedback.effort)
     theta -= joint_offsets
     theta = theta - np.array([1.58702857, -0.08002613])
-    if (theta > limits).any():
-        limit_stop_flag = True
-    return theta, omega, torque, limit_stop_flag
+    return theta, omega, torque
+
+def get_hebi_feedback_without_random_offsets(group, hebi_feedback, joint_offsets=np.array([-np.pi/2, 0.3])):
+    # joint_offsets - set in radians to change x/y position [rotation from hebi x, rotation from hebi y]
+    # limit_stop currently limits position of both joints the same [lower limit, higher limit] in radians
+    limit_stop_flag = False
+    group.get_next_feedback(reuse_fbk=hebi_feedback)
+    theta = np.array(hebi_feedback.position)
+    omega = np.array(hebi_feedback.velocity)
+    torque = np.array(hebi_feedback.effort)
+    theta -= joint_offsets
+    return theta, omega, torque
 
 def send_hebi_effort_command(group, command):
     group.send_command(command)

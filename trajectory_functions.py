@@ -24,7 +24,7 @@ class Trajectory:
 
         if self.shape == "circle":
             #== Circle variables ==#
-            print("f:", self.f)
+            #print("f:", self.f)
             w = 2*np.pi*self.f
             #======================#
 
@@ -44,15 +44,34 @@ class Trajectory:
         if self.shape == "chirp2":
             #== Chirp variables ==#
             f0 = 0.001
-            f1 = 0.2
+            f1 = 0.0666
             #=====================#
             fa = f0 + (f1 - f0) * t / self.T
             xd = np.cos(np.pi*fa*t)
             yd = np.cos(np.pi*fa*t)
             K = np.sqrt(np.pi*fa**2 + np.pi*fa**2)
             self.K = K
-            
-            
+
+        if self.shape == "sines":
+            #== Sine variables ==#
+            f = np.array([0.01, 0.015, 0.02, 0.04, 0.06, 0.08, 0.16, 0.25, 0.35])*1.5
+            A = np.array([1, 0.95, 0.83, 0.75, 0.58, 0.25, 0.15, 0.08, 0.04])
+            A = 1.3*A/np.sum(A)
+            #=====================#
+            yd = 0
+            for i in range(0,f.shape[0]):
+                yd = yd + A[i]*np.cos(2*np.pi*f[i]*t)
+            yd = yd - 0.3
+            xd = yd
+
+        if self.shape == "varsine":
+            #== Sine variables ==#
+            max_vel = 0.0254
+            A = np.sin(0.1*t) + 0.01
+            w = max_vel / A
+            #=====================#
+            yd = A * np.cos(w*t)
+            xd = yd
 
         return np.array([xd, yd])          
 

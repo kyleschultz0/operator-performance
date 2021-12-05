@@ -12,7 +12,7 @@ init2_e2 = 0
 init3_e1 = 0
 init3_e2 = 0
 init_tol1 = 0.15 # rad
-init_tol2 = 0.005 # rad
+init_tol2 = 0.02 # rad
 init_tol3 = 0.02 # rad
  
 # Initialize loop timer previous time:
@@ -27,7 +27,7 @@ type = "hebi"
 
 def calculate_hebi_position(group, hebi_feedback, offset, workspace_size = 0.37):
     pos_scale = window_size/workspace_size
-    theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback)
+    theta, omega, torque = get_hebi_feedback(group, hebi_feedback)
     pos = pos_scale*np.array([-L1*np.sin(theta[0]) - L2*np.cos(theta[0]+theta[1]), L1*np.cos(theta[0])-L2*np.sin(theta[0]+theta[1])])
     pos[1] = animation_window_height - pos[1]
     pos += offset
@@ -124,7 +124,7 @@ def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type):
 
     t, t0 = reset_timer()
     while not converged2:
-        h_theta, h_omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback) 
+        h_theta, h_omega, torque = get_hebi_feedback(group, hebi_feedback) 
         t = loop_timer(t0, 0.01, print_loop_time=False)
         if not converged1:
             effort, converged1 = initializing_controller1(h_theta,theta_d,h_omega,omega_d, init_tol1, slack)
@@ -137,7 +137,7 @@ def set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type):
         sleep(0.2)
         print("Resetting backlash...")
         while not converged3:
-            h_theta, h_omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback) 
+            h_theta, h_omega, torque = get_hebi_feedback(group, hebi_feedback) 
             t = loop_timer(t0, 0.01, print_loop_time=False)
             effort, converged3 = initializing_controller3(h_theta,theta_d,h_omega,omega_d, init_tol3)
             command.effort = effort
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
 
-    theta, omega, torque, hebi_limit_stop_flag = get_hebi_feedback(group, hebi_feedback) 
+    theta, omega, torque = get_hebi_feedback(group, hebi_feedback) 
 
     pos0 = calculate_hebi_position(group, hebi_feedback, offset = 0)
     offset = (window_size/2)*np.array([1, 1]) - pos0

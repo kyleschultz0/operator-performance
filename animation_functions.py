@@ -66,7 +66,7 @@ if __name__ == "__main__":
     animation_canvas = create_animation_canvas(animation_window)
     line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
-    trajectory = Trajectory("chirp", 60, None, window_size)
+    trajectory = Trajectory("sines", 60, None, window_size)
     pos = trajectory.screen_coordinates(0)
     target_ball = Ball(pos, target_ball_radius, "red", animation_canvas)
     input_ball = Ball(pos, input_ball_radius, "white", animation_canvas)
