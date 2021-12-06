@@ -17,9 +17,9 @@ inner_PI_e2 = 0
 preview_time = 0
 oneD = False
 # type = "hebi"
-# type = "controller"
+#type = "controller"
 type = "encoder"
-trajectory_type = "circle"
+trajectory_type = "sines"
 backlash_compensation = True
 include_GPR = False
 model_number = '1'
@@ -219,11 +219,11 @@ if __name__ == "__main__":
     count = 0
     rmse_sum = 0
 
-    if type == "encoder" and backlash_compensation:
+    if type != "controller":     # this was only for encoder w/ backlash but I think it should be for everything except controller
         theta_init, _, _ = get_hebi_feedback_without_random_offsets(group, hebi_feedback)  
         user_theta_d = np.array(theta_init) #- np.array([c_bl[1], c_bl[3]]) # initialize 
-    theta_init, _, _ = get_hebi_feedback_without_random_offsets(group, hebi_feedback)  
-    user_theta_d = np.array(theta_init) #- np.array([c_bl[1], c_bl[3]]) # initialize backlash
+        theta_init, _, _ = get_hebi_feedback_without_random_offsets(group, hebi_feedback)  
+        user_theta_d = np.array(theta_init) #- np.array([c_bl[1], c_bl[3]]) # initialize backlash
 
     while True:
        count += 1
@@ -282,6 +282,8 @@ if __name__ == "__main__":
            output += [[t, pos_input[0]*0.00037, pos_input[1]*0.00037, pos[0]*0.00037, pos[1]*0.00037,
                       vel_d[0], vel_d[1], error, omega_d[0], omega_d[1], omega_f[0], omega_f[1], omega[0], omega[1],
                       theta_controller[0], theta_controller[1], theta_d[0], theta_d[1], theta_out[0], theta_out[1]]]
+       elif type == "controller":
+           output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
        else:
            #output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
            #output += [[t, pos_input[0]*0.00037, pos_input[1]*0.00037, pos[0]*0.00037, pos[1]*0.00037, error]]
