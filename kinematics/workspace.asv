@@ -18,19 +18,9 @@ q = {th1,th2};
 plotworkspace(DH,q)
 hold on
 
-%% Rectangular workspace
-
-xpos = [-0.5 -0.1 0.25 -0.2];
-ypos = [-0.15 -0.15 0.48 0.48];
-
-% wrap-around for closed region
-xpos(5) = xpos(1);
-ypos(5) = ypos(1);
-
-plot(xpos, ypos, 'LineWidth',2,'color','g')
 
 %% Square workspace
-xc = -0.1; yc = -0.17; size = 0.37;    % center and size of square
+xc = -0.1; yc = -0.16; size = 0.37;    % center and size of square
 
 plot([xc, xc, xc - size, xc - size, xc],....
      [yc, yc + size, yc + size, yc, yc],'LineWidth',2,'color','k')
@@ -38,14 +28,14 @@ plot([xc, xc, xc - size, xc - size, xc],....
  
 trajOffx = (window_size/2-100)/window_size*size;
 
-xi = xc - size/2 + trajOffx;
-yi = yc + size/2;
+xi = xc - size/2 + size/2.2;
+yi = yc + size/2 - size/2.2;
 plot(xi, yi, "b*",'LineWidth',2)
 
  
  %% Inverse kinematics for initial position
  
- syms L_1 L_2 theta1 theta2 XE YE
+syms L_1 L_2 theta1 theta2 XE YE
 
 XE_RHS = -L_1*sin(theta1) - L_2*cos(theta1+theta2);
 YE_RHS = L_1*cos(theta1) - L_2*sin(theta1+theta2);
@@ -71,7 +61,7 @@ tmp_th2 = TH2_MLF{1}(L1,L2,xi,yi)
 
 T = 60;
 t_step = 0.01;
-t = 0:t_step:T;
+t = 0:t_step:10;
 
 type = "chirp";
 
@@ -91,8 +81,8 @@ if type == "chirp"
     f1 = 0.1;
     fa = f0 + (f1 - f0) * t / T;
     fb = f1 - (f1 - f0) * t / T;
-    x = size/2.2.*cos(pi.*fa.*t) + xc - size/2;
-    y = size/2.2.*cos(pi.*fb.*(T-t)) + yc + size/2;
+    x = size/2.2.*cos(pi.*fa.*t) + xi - size/2.2;
+    y = yi - size/2.2.*cos(pi.*fb.*(T-t)) + size/2.2;
 end
     
     

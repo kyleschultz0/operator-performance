@@ -1,7 +1,7 @@
 clc; clear all; close all
 
 
-hebi_vel = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\hebi_0025_uncompensated_6.csv");
+hebi_vel = importfile("C:\Users\Kyle\source\repos\hebi-performance\csv\hebi_0025_uncompensated__kyle_variablegains.csv");
 
 
 
@@ -13,11 +13,18 @@ plot(hebi_vel.t, hebi_vel.pos_in1, 'r', hebi_vel.t, hebi_vel.pos1, 'r--',...
 legend("Desired x", "Output x", "Desired y", "Output y")
 ylim([0, 1100])
 
+d = designfilt('lowpassiir','FilterOrder',12, ...
+    'HalfPowerFrequency',0.004,'DesignMethod','butter');
+
+
+velf = filtfilt(d,hebi_vel.error);
+% velf = lowpass(hebi_vel.error, 0.001, 0.01);
 figure;
-plot(hebi_vel.t, hebi_vel.error)
+plot(hebi_vel.t, velf, hebi_vel.t, hebi_vel.error)
 title("Error Between Desired and Actual Ouput")
 xlabel("Time (s)")
-ylabel("Distance (pixels")
+ylabel("Distance (pixels)")
+legend("Filtered", "Unfiltered")
 
 t = hebi_vel.t;
 
@@ -54,17 +61,25 @@ pos2 = [hebi_vel.pos_in2];
 vel1 = diff(pos1)./diff(t);
 vel2 = -diff(pos2)./diff(t);
 
-vel1 = lowpass(vel1, 0.25)/amp;
-vel2 = lowpass(vel2, 0.25)/amp;
+vel1 = lowpass(vel1, 0.3)/amp;
+vel2 = lowpass(vel2, 0.3)/amp;
 
 vel1d = (diff(pos1d)./diff(t))/amp;
 vel2d = -diff(pos2d)./diff(t)/amp;
 
+% d = designfilt('lowpassiir','FilterOrder',12, ...
+%     'HalfPowerFrequency',0.05/4,'DesignMethod','butter');
+% 
+% vel1 = filtfilt(d,vel1)/amp;
+% vel2 = filtfilt(d,vel2)/amp;
+
 figure;
 plot(t(1:end-1), vel1, 'b', t, veld1, 'b--', t(1:end-1), vel1d, "b.", t(1:end-1),...
     vel2, 'r', t, veld2, 'r--', t(1:end-1), vel2d, "r.")
-legend("Actual Velocity 1", "User Desired Velocity 1", "Desired Velocity 1",...
-    "Actual Velocity 2", "User Desired Velocity 2", "Desired Velocity 1")
+legend("Actual Velocity x", "User Desired Velocity x", "Desired Velocity x",...
+    "Actual Velocity y", "User Desired Velocity y", "Desired Velocity y")
+xlabel("Time (s)")
+ylabel("Velocity (m/s)")
 
 
 
@@ -150,15 +165,31 @@ legend("Actual Velocity 1", "User Desired Velocity 1", "Desired Velocity 1",...
 
 Ts = 0.01;
 
-L = length(hebi_vel.pos1);
+L = length(hebi_vel.pos2);
 
-Y = fft(hebi_vel.pos1);
+Y = fft(hebi_vel.pos2);
 Y = Y(1:L/2);
-U = fft(hebi_vel.pos_in1);
+U = fft(hebi_vel.pos_in2);
 U = U(1:L/2);
 w = 1/Ts*(1:(L/2))/L;
 
 G = Y./U;
+
+%%
+
+fs = 100;               % sampling frequency
+t = 0:(1/fs):(10-1/fs); % time vector
+S = hebi_vel.error;
+n = length(S);
+X = fft(S);
+f = (0:n-1)*(fs/n);     %frequency range
+power = abs(X);    %power
+figure;
+plot(f,power)
+xlabel("Frequency (Hz)")
+ylabel("Power")
+title("Spectrum of Error")
+
 
 mag = sqrt(real(G).^2 + imag(G).^2);
 phase = atan2(imag(G), real(G));
@@ -175,7 +206,7 @@ semilogx(w, 180/pi*phase, 'ko', 'linewidth', 1.5); hold on; grid on;
 title('Phase');
 xlabel('Frequency [Hz]');
 ylabel('Phase [degree]');
-xlim([0 1])
+xlim([0 1.25])
 
 
 
