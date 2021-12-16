@@ -127,7 +127,7 @@ def calculate_velocity(theta, joystick, K):
        Jinv = np.matrix([[-cos(theta1 + theta2)/(L1*cos(theta2)), -sin(theta1 + theta2)/(L1*cos(theta2))],
                          [(L2*cos(theta1 + theta2) + L1*sin(theta1))/(L1*L2*cos(theta2)), (L2*sin(theta1 + theta2) - L1*cos(theta1))/(L1*L2*cos(theta2))]])
        # print("Jinv:", Jinv)
-       vel_d = K @ axis
+       vel_ommitd = K @ axis
        omega_d = Jinv @ K @ axis
        omega_d = np.squeeze(np.asarray(omega_d))
 
