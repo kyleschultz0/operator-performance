@@ -18,20 +18,6 @@ q = {th1,th2};
 plotworkspace(DH,q)
 hold on
 
-
-%% Square workspace
-xc = -0.1; yc = -0.16; size = 0.37;    % center and size of square
-
-plot([xc, xc, xc - size, xc - size, xc],....
-     [yc, yc + size, yc + size, yc, yc],'LineWidth',2,'color','k')
- 
- 
-trajOffx = (window_size/2-100)/window_size*size;
-
-xi = xc - size/2 + size/2.2;
-yi = yc + size/2 - size/2.2;
-plot(xi, yi, "b*",'LineWidth',2)
-
  
  %% Inverse kinematics for initial position
  
@@ -55,38 +41,25 @@ TH1_MLF{2} = matlabFunction(S.theta1(2),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{1} = matlabFunction(S.theta2(1),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{2} = matlabFunction(S.theta2(2),'Vars',[L_1 L_2 XE YE]);
 
-tmp_th1 = TH1_MLF{1}(L1,L2,xi,yi)
-tmp_th2 = TH2_MLF{1}(L1,L2,xi,yi)
+%% Square workspace
+xc = -0.1; yc = -0.16; size = 0.37;    % center and size of square
+
+plot([xc, xc, xc - size, xc - size, xc],....
+     [yc, yc + size, yc + size, yc, yc],'LineWidth',2,'color','k')
+ 
+ 
+trajOffx = (window_size/2-100)/window_size*size;
+
+xi = xc - size/2 + size/2.2;
+yi = yc + size/2 - size/2.2;
+plot(xi, yi, "b*",'LineWidth',2)
 
 
-T = 60;
-t_step = 0.01;
-t = 0:t_step:10;
+[theta1i, theta2i] = ikInit(xi, yi, L1, L2, TH1_MLF, TH2_MLF)
 
-type = "chirp";
 
-if type == "circle"
-    f = 0.05;
-    a = 2*pi*f;
-    a_per_b = 0.5;
-    b = a/a_per_b;
-    d = pi/4;
-    
-    x = size/2.2*sin(a*t+d) + xc - size/2;
-    y = size/2.2*cos(b*t) + yc + size/2;
+
+function [theta1i, theta2i] = ikInit(xi, yi, L1, L2, TH1_MLF, TH2_MLF)
+theta1i = TH1_MLF{1}(L1,L2,xi,yi);
+theta2i = TH2_MLF{1}(L1,L2,xi,yi);
 end
-
-if type == "chirp"
-    f0 = 0.001;
-    f1 = 0.1;
-    fa = f0 + (f1 - f0) * t / T;
-    fb = f1 - (f1 - f0) * t / T;
-    x = size/2.2.*cos(pi.*fa.*t) + xi - size/2.2;
-    y = yi - size/2.2.*cos(pi.*fb.*(T-t)) + size/2.2;
-end
-    
-    
-
-plot(x, y, 'LineWidth',1,'color','b')
-
-

@@ -3,12 +3,18 @@ import matplotlib.pyplot as plt
 
 class Trajectory:
 
-    def __init__(self, shape, T, f, window_size):
+    def __init__(self, shape, T, f, window_size, trial = 1):
         self.shape = shape
         self.T = T
         self.f = f
         self.window_size = window_size
         self.K = 1  # wrong
+        self.trial = trial
+
+    def trialLookup(self, trial, path = "csv/sines.csv"):
+        data = genfromtxt(path, delimiter=',')
+        self.traj = data[[0,self.trial], :]
+
 
     def coordinates(self, t):
         if self.shape == "lissajous":
@@ -71,6 +77,31 @@ class Trajectory:
             w = max_vel / A
             #=====================#
             yd = A * np.cos(w*t)
+            xd = yd
+        if self.shape == "sines2":
+            #== Sine variables ==#
+            f = np.array([0.105, 0.157, 0.419, 0.471, 0.733, 0.785, 1.361, 1.414, 2.094, 2.147,
+                          4.084, 4.136, 5.760, 5.812, 7.749, 7.802, 9.268, 9.320, 11.519, 11.572])
+            A = np.array([0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.145, 0.145,
+                          0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145])
+            #=====================#
+            yd = 0
+            for i in range(0,f.shape[0]):
+                yd = yd + A[i]*np.sin(f[i]*t)
+            yd = yd - 0.3
+            xd = yd
+
+        if self.shape == "sineInterp":
+            #== Sine variables ==#
+            f = np.array([0.105, 0.157, 0.419, 0.471, 0.733, 0.785, 1.361, 1.414, 2.094, 2.147,
+                          4.084, 4.136, 5.760, 5.812, 7.749, 7.802, 9.268, 9.320, 11.519, 11.572])
+            A = np.array([0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.145, 0.145,
+                          0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145])
+            #=====================#
+            yd = 0
+            for i in range(0,f.shape[0]):
+                yd = yd + A[i]*np.sin(f[i]*t)
+            yd = yd - 0.3
             xd = yd
 
         return np.array([xd, yd])          
