@@ -47,6 +47,9 @@ writematrix(xd, "sines.csv")
 
 figure;
 plot(t, xd(2:end, :))
+xlabel("Time (s)")
+ylabel("Position")
+title("Sample of 5 Random Trajectories")
 
 
 % Power spectrum of signals
@@ -135,18 +138,18 @@ end
 
 writematrix(thetai, "thetai.csv")
 
-t_test = 60; 
-
-hold on
-figure;
-xlim([-1, 1]);
-ylim([-1, 1]);
-for i = 1:t_test*fs
-    hold on
-    cla
-    plot(xd(2, i), -xd(2, i), 'ro')
-    pause(1/fs)
-end
+% t_test = 60; 
+% 
+% hold on
+% figure;
+% xlim([-1, 1]);
+% ylim([-1, 1]);
+% for i = 1:t_test*fs
+%     hold on
+%     cla
+%     plot(xd(2, i), -xd(2, i), 'ro')
+%     pause(1/fs)
+% end
 
 
 %% Functions
