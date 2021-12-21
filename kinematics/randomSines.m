@@ -1,6 +1,70 @@
 clc; clear all; close all;
 addpath rtb common smtb
 
+
+%% Trajectory
+
+T = 120;
+fs = 100;
+num = 30;
+
+t = 0:1/fs:T;
+
+
+A1 = [0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610];
+
+A2 = [0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145,...
+      0.145, 0.145, 0.145]./4;
+
+A = [A1, A2];
+ 
+fd = [0.105, 0.157, 0.419, 0.471, 0.733, 0.785, 1.361, 1.414, 2.094, 2.147,...
+    4.084, 4.136, 5.760, 5.812, 7.749, 7.802, 9.268, 9.320, 11.519, 11.572];
+
+
+rng(2)
+phi = 2*pi*rand(30, 20);
+
+x = zeros(num, length(t));
+
+for i = 1:num
+    for j = 1:length(fd)
+        x(i, :) = x(i, :) + A(j)*sin(fd(j)*t + phi(i, j));
+    end
+end
+
+xd = 1.2*x./(sum(A));    % normalize to one, low probability of being >1
+xd = [t; xd];
+
+writematrix(xd, "sines.csv")
+
+
+figure;
+plot(t, xd(2:end, :))
+
+
+%% Power spectrum of signals (should match)
+
+figure;
+N = length(x(2:end, :));
+freq = 0:fs/length(x(2:end, :)):fs/2;
+
+for i = 2:num+1
+    xdft = fft(xd(i, :));
+    xdft = xdft(1:N/2+1);
+    psdx = (1/(fs*N)) * abs(xdft).^2;
+    psdx(2:end-1) = 2*psdx(2:end-1);
+    power(i - 1, :) = psdx;
+end
+
+loglog(freq,power)
+title('Periodogram')
+xlabel('Frequency (rad/s)')
+ylabel('Power/Frequency')
+xlim([0, max(fd)+1])
+ylim([10^-3, 5*10^1])
+
+
 %% Inverse kinematics for initial position
  
 syms L_1 L_2 theta1 theta2 XE YE
@@ -24,65 +88,6 @@ TH2_MLF{1} = matlabFunction(S.theta2(1),'Vars',[L_1 L_2 XE YE]);
 TH2_MLF{2} = matlabFunction(S.theta2(2),'Vars',[L_1 L_2 XE YE]);
 
 
-%% Trajectory
-
-T = 120;
-fs = 30;
-num = 30;
-
-t = 0:1/fs:T;
-
-
-A = [0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.145, 0.145,...
-     0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145];
- 
-fd = [0.105, 0.157, 0.419, 0.471, 0.733, 0.785, 1.361, 1.414, 2.094, 2.147,...
-    4.084, 4.136, 5.760, 5.812, 7.749, 7.802, 9.268, 9.320, 11.519, 11.572];
-
-
-rng('default')
-phi = 2*pi*rand(30, 20);
-
-x = zeros(num, length(t));
-
-for i = 1:num
-    for j = 1:length(fd)
-        x(i, :) = x(i, :) + A(j)*sin(fd(j)*t + phi(i, j));
-    end
-end
-
-xd = 1.2*x./(sum(A));    % normalize to one, low probability of being >1
-xd = [t; xd];
-
-writematrix(xd, "sines.csv")
-
-max(xd, [], 'all');
-
-
-figure;
-plot(t, xd)
-
-
-%% Power spectrum of signals (should match)
-
-figure;
-N = length(xd);
-freq = 0:fs/length(xd):fs/2;
-
-for i = 1:num
-    xdft = fft(xd(i, :));
-    xdft = xdft(1:N/2+1);
-    psdx = (1/(fs*N)) * abs(xdft).^2;
-    psdx(2:end-1) = 2*psdx(2:end-1);
-    power(i, :) = psdx;
-end
-
-loglog(freq,power)
-title('Periodogram')
-xlabel('Frequency (rad/s)')
-ylabel('Power/Frequency')
-xlim([0, max(fd)+1])
-ylim([10^-3, 5*10^1])
 
 
 %% Compute workspace of robot
@@ -113,12 +118,29 @@ axis equal
  
  
 trajOffx = (window_size/2-100)/window_size*size;
-
-for i = 1:num
+thetai = zeros(2, num);
+for i = 2:num+1
     [theta1i, theta2i, x, y] = ikInit(xd(i, :), L1, L2, TH1_MLF, TH2_MLF);
     plot(x(1), y(1), "b*",'LineWidth',2)
     plot(x(1, :), y(1, :))
+    thetai(1, i-1) = theta1i;
+    thetai(2, i-1) = theta2i;
 end
+
+writematrix(thetai, "thetai.csv")
+
+% t_test = 120; 
+% 
+% hold on
+% figure;
+% xlim([-1, 1]);
+% ylim([-1, 1]);
+% for i = 1:t_test*fs
+%     hold on
+%     cla
+%     plot(xd(2, i), -xd(2, i), 'ro')
+%     pause(1/fs)
+% end
 
 
 %% Functions

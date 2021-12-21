@@ -11,9 +11,15 @@ class Trajectory:
         self.K = 1  # wrong
         self.trial = trial
 
-    def trialLookup(self, trial, path = "csv/sines.csv"):
-        data = genfromtxt(path, delimiter=',')
-        self.traj = data[[0,self.trial], :]
+    def trialLookup(self, path1 = "csv/sines.csv", path2 = "csv/thetai.csv"):
+        traj = np.genfromtxt(path1, delimiter=',')
+        self.traj = traj[[0,self.trial], :]
+        self.traj = traj[[0,self.trial], :]
+
+        thetai = np.genfromtxt(path2, delimiter=',')
+        self.thetai1 = thetai[0, self.trial-1]
+        self.thetai2 = thetai[1, self.trial-1]
+        return
 
 
     def coordinates(self, t):
@@ -92,17 +98,10 @@ class Trajectory:
             xd = yd
 
         if self.shape == "sineInterp":
-            #== Sine variables ==#
-            f = np.array([0.105, 0.157, 0.419, 0.471, 0.733, 0.785, 1.361, 1.414, 2.094, 2.147,
-                          4.084, 4.136, 5.760, 5.812, 7.749, 7.802, 9.268, 9.320, 11.519, 11.572])
-            A = np.array([0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.145, 0.145,
-                          0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145])
-            #=====================#
-            yd = 0
-            for i in range(0,f.shape[0]):
-                yd = yd + A[i]*np.sin(f[i]*t)
-            yd = yd - 0.3
-            xd = yd
+            t1 = self.traj[0, :]
+            x = self.traj[1, :]
+            xd = np.interp(t, t1, x)
+            yd = xd
 
         return np.array([xd, yd])          
 
@@ -131,8 +130,10 @@ if __name__ == "__main__":
     T = 120
     window_size = 1000
     f = 0.1
+    trial = 3
 
-    trajectory = Trajectory("chirp", T, f, window_size)
+    trajectory = Trajectory("sineInterp", T, f, window_size, trial)
+    trajectory.trialLookup()
 
     t = np.linspace(0, T, 1000)
     coords = trajectory.coordinates(t)
@@ -153,7 +154,6 @@ if __name__ == "__main__":
 
     plot4 = plt.figure(4)
     plt.plot(screen_coords[0, :], screen_coords[1, :])
-
 
     plt.show()
 

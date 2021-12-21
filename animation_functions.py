@@ -61,12 +61,14 @@ def draw_preview(canvas, line, trajectory, preview_time, T, t):
     return
 
 if __name__ == "__main__":
-    T = 100
+    T = 120
+    trial = 2
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
     line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
-    trajectory = Trajectory("sines", 60, None, window_size)
+    trajectory = Trajectory("sineInterp", T, None, window_size, trial)
+    trajectory.trialLookup()
     pos = trajectory.screen_coordinates(0)
     target_ball = Ball(pos, target_ball_radius, "red", animation_canvas)
     input_ball = Ball(pos, input_ball_radius, "white", animation_canvas)

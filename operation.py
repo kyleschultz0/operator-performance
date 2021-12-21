@@ -19,7 +19,8 @@ oneD = False
 # type = "hebi"
 #type = "controller"
 type = "encoder"
-trajectory_type = "sines"
+trajectory_type = "sineInterp"
+trial = 1
 backlash_compensation = True
 include_GPR = False
 model_number = '1'
@@ -141,7 +142,10 @@ if __name__ == "__main__":
 
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
-    trajectory = Trajectory(trajectory_type, T, f, window_size)
+    trajectory = Trajectory(trajectory_type, T, f, window_size, trial)
+    if trajectory_type == "sineInterp":
+        trajectory.trialLookup()
+
     print("T in class:", trajectory.T)
     t_max, vel_max = trajectory.max_vel()
 
@@ -173,6 +177,10 @@ if __name__ == "__main__":
         if trajectory_type == "chirp" or trajectory_type == "chirp2" or trajectory_type == "sines":
             theta1i = 1.3728
             theta2i = 0.8586
+
+        if trajectory_type == "sineInterp":
+            theta1i = self.thetai1
+            theta2i = self.thetai2
 
 
         set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
