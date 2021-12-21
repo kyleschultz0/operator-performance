@@ -20,12 +20,13 @@ oneD = False
 #type = "controller"
 type = "encoder"
 trajectory_type = "sineInterp"
-trial = 1
-backlash_compensation = True
+trial = 3
+backlash_compensation = False
 include_GPR = False
 model_number = '1'
 f = 0.025 # default: 0.025
 T = 1/f
+T = 120
 
 bl_switch_freq = 2 # hz
 threshold_bl = 0.0
@@ -98,12 +99,12 @@ def save_data(output):
         comp = "uncompensated"
     fs = str(f)
     f_r = fs.replace('.', '')
-    save_name = "csv/{}_{}_{}_1.csv".format(type, f_r, comp)
-    for i in range(2, 100):
-        if path.exists(save_name) is True:
-            save_name = "csv/{}_{}_{}_{}.csv".format(type, f_r, comp, i)
-        else:
-            break
+    save_name = "csv/{}_{}_{}_{}.csv".format(type, f_r, comp, trial)
+    #for i in range(2, 100):
+    #    if path.exists(save_name) is True:
+    #        save_name = "csv/{}_{}_{}_{}.csv".format(type, f_r, comp, i)
+    #    else:
+    #        break
 
     np.savetxt(save_name, np.array(output), delimiter=",")
     print("Data saved as:", save_name)
@@ -132,7 +133,7 @@ def calculate_velocity(theta, joystick, K):
        omega_d = Jinv @ K @ axis
        omega_d = np.squeeze(np.asarray(omega_d))
 
-       return omega_d, vel_d
+       return omega_d, vel_ommitd
 
 if __name__ == "__main__":
 
@@ -158,8 +159,7 @@ if __name__ == "__main__":
 
     if type == "hebi" or type == "encoder":
 
-        K_gain = 1.5
-        K_gain = 0.2
+        K_gain = 1
         workspace_size = 0.37
         K = K_gain*(workspace_size/window_size)*vel_max*np.matrix([[1, 0], [0, 1]])
         print("Gain matrix:", K)
@@ -179,8 +179,8 @@ if __name__ == "__main__":
             theta2i = 0.8586
 
         if trajectory_type == "sineInterp":
-            theta1i = self.thetai1
-            theta2i = self.thetai2
+            theta1i = trajectory.thetai1
+            theta2i = trajectory.thetai2
 
 
         set_hebi_position(group, hebi_feedback, command, theta1i, theta2i, type)
