@@ -8,7 +8,7 @@ window_size = 1000   # size of (square) animation window
 animation_window_width = window_size    # width of the animation window
 animation_window_height = window_size   # height of the animation window
 target_ball_radius = 10  
-input_ball_radius = 5
+input_ball_radius = 8
 
 class Ball:
     def __init__(self, position, radius, color, canvas):
@@ -46,7 +46,7 @@ def create_animation_canvas(window):
   return canvas
 
 def draw_preview(canvas, line, trajectory, preview_time, T, t):
-    num = 10
+    num = 20
     if t < T - preview_time:
         prev_end = t + preview_time
     else:
@@ -54,9 +54,10 @@ def draw_preview(canvas, line, trajectory, preview_time, T, t):
 
     t_prev = np.linspace(t, prev_end, num)
     traj = trajectory.screen_coordinates(t_prev)
+    ypix = np.round(np.linspace(traj[1, 0], traj[1, 0] - 300, num))
     line_array = []
     for i in range(0,num-1):
-        line_array += [traj[0, i], traj[1, i]]
+        line_array += [traj[0, i], ypix[i]]
     canvas.coords(line, line_array)
     return
 

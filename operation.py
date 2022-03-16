@@ -117,7 +117,8 @@ if __name__ == "__main__":
     pos_i = trajectory.screen_coordinates(0)
     target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
 
-    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
+    line = animation_canvas.create_line(0, 0, 0, 0, fill='red', smooth='true', dash=(6,4))
+    # line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
     gain = vel_max
     input_ball = Ball(pos_i, input_ball_radius, "white", animation_canvas)
@@ -147,14 +148,12 @@ if __name__ == "__main__":
         t = loop_timer(t0w, Tw, print_loop_time=True)
 
         pos_input, t_draw = controller_draw(joystick,pos_input,t_draw,gain)
-        pos_input[1] = 100 + 8*t
+        pos_input[1] = 450
            
         theta_out = np.zeros(2)
 
         draw_preview(animation_canvas, line, trajectory, preview_time, T, t)
         pos = target_ball.move(trajectory.screen_coordinates(t))
-        print(pos)
-        print(t)
         target_ball.move(pos)
 
         input_ball.move(pos_input)

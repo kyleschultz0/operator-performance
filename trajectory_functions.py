@@ -34,9 +34,7 @@ class Trajectory:
 
             xd *= 1.6/np.sum(A)
             xd -= xd[0]
-            yd = 0.1 + t/120
-        
-     
+            
         self.t = t
         self.xd = xd
         self.yd = yd
