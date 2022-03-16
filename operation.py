@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 
 
 #=== Change these to gather trials ===#
-preview_time = 0
+preview_time = 1
 oneD = False
-trajectory_type = "sineInterp"
+trajectory_type = "sines"
 trial = 1
 f = 0.025 # default: 0.025
 T = 1/f
@@ -18,8 +18,6 @@ T = 120
 bl_switch_freq = 2 # hz
 threshold_bl = 0.0
 user_cutoff_freq = 3.0
-
-
 
 #=== Global variables ===#
 
@@ -68,7 +66,7 @@ def loop_timer(t0, T, print_loop_time=False):
 def save_data(output):
     fs = str(f)
     f_r = fs.replace('.', '')
-    save_name = "csv/{}_{}_{}.csv".format(type, f_r, trial)
+    save_name = "csv/{}_{}_{}.csv".format(trajectory_type, f_r, trial)
     #for i in range(2, 100):
     #    if path.exists(save_name) is True:
     #        save_name = "csv/{}_{}_{}_{}.csv".format(type, f_r, comp, i)
@@ -113,21 +111,15 @@ if __name__ == "__main__":
     animation_window = create_animation_window()
     animation_canvas = create_animation_canvas(animation_window)
     trajectory = Trajectory(trajectory_type, T, f, window_size, trial)
-    if trajectory_type == "sineInterp":
-        trajectory.trialLookup()
 
-    print("T in class:", trajectory.T)
     t_max, vel_max = trajectory.max_vel()
-
-
 
     pos_i = trajectory.screen_coordinates(0)
     target_ball = Ball(pos_i, target_ball_radius, "red", animation_canvas)
 
     line = animation_canvas.create_line(0, 0, 0, 0, fill='red', arrow='last', smooth='true', dash=(6,4))
 
-    gain = 2*vel_max
-    print(gain)
+    gain = vel_max
     input_ball = Ball(pos_i, input_ball_radius, "white", animation_canvas)
     pos_input = pos_i
     
@@ -152,14 +144,17 @@ if __name__ == "__main__":
     while True:
         count += 1
 
-        t = loop_timer(t0w, Tw, print_loop_time=False)
+        t = loop_timer(t0w, Tw, print_loop_time=True)
 
         pos_input, t_draw = controller_draw(joystick,pos_input,t_draw,gain)
+        pos_input[1] = 100 + 8*t
            
         theta_out = np.zeros(2)
 
         draw_preview(animation_canvas, line, trajectory, preview_time, T, t)
         pos = target_ball.move(trajectory.screen_coordinates(t))
+        print(pos)
+        print(t)
         target_ball.move(pos)
 
         input_ball.move(pos_input)
@@ -168,7 +163,6 @@ if __name__ == "__main__":
         rmse_sum += np.sum(np.square(pos-pos_input))
 
         output += [[t, pos_input[0], pos_input[1], pos[0], pos[1], error]]
-
 
         if i == 0:
             print("Ready to operate...")

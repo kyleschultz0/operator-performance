@@ -10,100 +10,39 @@ class Trajectory:
         self.window_size = window_size
         self.K = 1  # wrong
         self.trial = trial
-
-    def trialLookup(self, path1 = "csv/sines.csv", path2 = "csv/thetai.csv"):
-        traj = np.genfromtxt(path1, delimiter=',')
-        self.traj = traj[[0,self.trial], :]
-        self.traj = traj[[0,self.trial], :]
-
-        thetai = np.genfromtxt(path2, delimiter=',')
-        self.thetai1 = thetai[0, self.trial-1]
-        self.thetai2 = thetai[1, self.trial-1]
-        return
-
-
-    def coordinates(self, t):
-        if self.shape == "lissajous":
-            #== Lissajous variables ==#
-            a = 2*np.pi
-            a_per_b = 0.5
-            b = a/a_per_b
-            d = np.pi/4
-            #=========================#
-
-            xd = np.sin(a*f*t+d)
-            yd = np.cos(b*f*t)
-
-        if self.shape == "circle":
-            #== Circle variables ==#
-            #print("f:", self.f)
-            w = 2*np.pi*self.f
-            #======================#
-
-            xd = np.cos(w*t)
-            yd = np.sin(w*t)
-    
-        if self.shape == "chirp":
-            #== Chirp variables ==#
-            f0 = 0.001
-            f1 = 0.1
-            #=====================#
-            fa = f0 + (f1 - f0) * t / self.T
-            fb = f1 - (f1 - f0) * t / self.T
-            xd = np.cos(np.pi*fa*t)
-            yd = np.cos(np.pi*fb*(self.T-t))
-
-        if self.shape == "chirp2":
-            #== Chirp variables ==#
-            f0 = 0.001
-            f1 = 0.0666
-            #=====================#
-            fa = f0 + (f1 - f0) * t / self.T
-            xd = np.cos(np.pi*fa*t)
-            yd = np.cos(np.pi*fa*t)
-            K = np.sqrt(np.pi*fa**2 + np.pi*fa**2)
-            self.K = K
+        
+        #== Trajectory initialization ==#
+        t = np.linspace(0, T, 100*T)
+        yd = np.zeros(t.shape)
+        xd = np.zeros(t.shape)
 
         if self.shape == "sines":
             #== Sine variables ==#
-            f = np.array([0.01, 0.015, 0.02, 0.04, 0.06, 0.08, 0.16, 0.25, 0.35])*1.5
-            A = np.array([1, 0.95, 0.83, 0.75, 0.58, 0.25, 0.15, 0.08, 0.04])
-            A = 1.3*A/np.sum(A)
-            #=====================#
-            yd = 0
-            for i in range(0,f.shape[0]):
-                yd = yd + A[i]*np.cos(2*np.pi*f[i]*t)
-            yd = yd - 0.3
-            xd = yd
+            wi = 2*np.pi/60;
+            wi = 2*np.pi/100;
+            kt = np.array([[1, 2, 3, 4, 5, 7, 8, 10, 11, 19, 20, 27, 28, 32, 36, 37, 44, 45, 55, 56]])
+            f = wi*kt
 
-        if self.shape == "varsine":
-            #== Sine variables ==#
-            max_vel = 0.0254
-            A = np.sin(0.1*t) + 0.01
-            w = max_vel / A
+            A1 = np.array([[0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610]])
+            A2 = np.array([[0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145,
+                  0.145, 0.145, 0.145]])
+            A = np.concatenate((A1, A2), axis=1, out=None, dtype=None, casting="same_kind")
             #=====================#
-            yd = A * np.cos(w*t)
-            xd = yd
-        if self.shape == "sines2":
-            #== Sine variables ==#
-            f = np.array([0.105, 0.157, 0.419, 0.471, 0.733, 0.785, 1.361, 1.414, 2.094, 2.147,
-                          4.084, 4.136, 5.760, 5.812, 7.749, 7.802, 9.268, 9.320, 11.519, 11.572])
-            A = np.array([0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.145, 0.145,
-                          0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145])
-            #=====================#
-            yd = 0
-            for i in range(0,f.shape[0]):
-                yd = yd + A[i]*np.sin(f[i]*t)
-            yd = yd - 0.3
-            xd = yd
 
-        if self.shape == "sineInterp":
-            t1 = self.traj[0, :]
-            x = self.traj[1, :]
-            xd = np.interp(t, t1, x)
-            yd = xd
+            for i in range(0,f.shape[1]):
+                xd += A[0, i]*np.sin(f[0, i]*t)
 
-        return np.array([xd, yd])          
+            xd *= 1.6/np.sum(A)
+            xd -= xd[0]
+            yd = 0.1 + t/120
+        
+     
+        self.t = t
+        self.xd = xd
+        self.yd = yd
+        
+    def coordinates(self, t):
+        return np.array([np.interp(t, self.t, self.xd), np.interp(t, self.t, self.yd)])
 
     def screen_coordinates(self, t):
         return self.window_size/2 - 50 + (self.window_size/2 - 100)*self.coordinates(t)
@@ -114,6 +53,7 @@ class Trajectory:
         t = 0
         r0 = self.screen_coordinates(0)
         vel_max = 0
+        t_max = 0
         while t < self.T-dt:
             t += dt
             drdt = (self.screen_coordinates(t) - r0)/dt
@@ -132,12 +72,17 @@ if __name__ == "__main__":
     f = 0.1
     trial = 3
 
-    trajectory = Trajectory("sineInterp", T, f, window_size, trial)
-    trajectory.trialLookup()
+    trajectory = Trajectory("sines", T, f, window_size, trial)
+    # trajectory.trialLookup()
 
     t = np.linspace(0, T, 1000)
     coords = trajectory.coordinates(t)
     screen_coords = trajectory.screen_coordinates(t)
+
+    print(trajectory.yd)
+    print(trajectory.xd)
+    print(coords)
+    print(screen_coords)
 
     t_max, vel_max = trajectory.max_vel()
     print("Max velocity:", vel_max)
@@ -154,6 +99,9 @@ if __name__ == "__main__":
 
     plot4 = plt.figure(4)
     plt.plot(screen_coords[0, :], screen_coords[1, :])
+
+    plot5 = plt.figure(5)
+    plt.plot(t, screen_coords[0, :])
 
     plt.show()
 
