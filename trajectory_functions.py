@@ -13,26 +13,29 @@ class Trajectory:
         
         #== Trajectory initialization ==#
         t = np.linspace(0, T, 100*T)
-        yd = np.zeros(t.shape)
+        yd = np.zeros(t.shape) + 29.5/2
         xd = np.zeros(t.shape)
 
         if self.shape == "sines":
             #== Sine variables ==#
-            wi = 2*np.pi/60;
-            wi = 2*np.pi/100;
-            kt = np.array([[1, 2, 3, 4, 5, 7, 8, 10, 11, 19, 20, 27, 28, 32, 36, 37, 44, 45, 55, 56]])
+            wi = 2*np.pi/120;
+            # kt = np.array([[1, 2, 3, 4, 5, 7, 8, 10, 11, 19, 20, 27, 28, 32, 36, 37, 44, 45, 55, 56]])
+            # kt = np.array([[2, 3, 8, 9, 14, 15, 26, 27, 40, 41, 78, 79, 110, 111, 148, 149, 177, 178, 220, 221]])
+            # f = wi*kt
+
+            # A1 = np.array([[0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610]])
+            # A2 = np.array([[0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145,
+            #      0.145, 0.145, 0.145]])
+            # A = np.concatenate((A1, A2), axis=1, out=None, dtype=None, casting="same_kind")
+            #=====================#
+            A = np.array([[0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610]])
+            kt = np.array([[2, 3, 8, 9, 14, 15, 26, 27]])
             f = wi*kt
 
-            A1 = np.array([[0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610, 0.610]])
-            A2 = np.array([[0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145, 0.145,
-                  0.145, 0.145, 0.145]])
-            A = np.concatenate((A1, A2), axis=1, out=None, dtype=None, casting="same_kind")
-            #=====================#
 
             for i in range(0,f.shape[1]):
                 xd += A[0, i]*np.sin(f[0, i]*t)
 
-            xd *= 1.6/np.sum(A)
             xd -= xd[0]
             
         self.t = t
@@ -43,7 +46,8 @@ class Trajectory:
         return np.array([np.interp(t, self.t, self.xd), np.interp(t, self.t, self.yd)])
 
     def screen_coordinates(self, t):
-        return self.window_size/2 - 50 + (self.window_size/2 - 100)*self.coordinates(t)
+        return np.array([1360/2 - 1360/36*self.coordinates(t)[0], 1200 -  1200/29.5*self.coordinates(t)[1]])
+        # return self.window_size/2 - 50 + (self.window_size/2 - 100)*self.coordinates(t)
 
     def max_vel(self):
         # Compute maximum velocity of trajectory in pixels
