@@ -4,7 +4,7 @@ import numpy as np
 from trajectory_functions import Trajectory
 
 preview_time = 1   # time window of trajectory preview  
-window_size = 1000   # size of (square) animation window
+window_size = 1360   # size of (square) animation window
 animation_window_width = 1360    # width of the animation window
 animation_window_height = 1200   # height of the animation window
 target_ball_radius = 10  

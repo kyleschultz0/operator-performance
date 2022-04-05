@@ -3,7 +3,6 @@ import numpy as np
 import keyboard
 import time
 from animation_functions import *
-
 def initialize_joystick():
         pygame.init()
         pygame.joystick.init()
@@ -19,11 +18,17 @@ def get_axis(joystick):
         axis = axis/mag
     return axis
 
+def optimal_control(gain, trajectory, t):
+    uinv = -trajectory.veld(t)/gain
+    return uinv
 
-def controller_draw(joystick,pos_last,t_draw,gain):
+
+def controller_draw(joystick,pos_last,t_draw,gain,trajectory,t):
     input = get_axis(joystick)
+    input_opt = optimal_control(gain, trajectory, t)
+    print("Input: ", input, "Optimal Input:", input_opt, "\n")
     delta_t = time() - t_draw
-    delta_pos = input*delta_t*gain
+    delta_pos = input_opt*delta_t*gain
     pos = pos_last + delta_pos
     t_draw = time()
     if pos[0] < input_ball_radius:
@@ -51,7 +56,7 @@ if __name__ == "__main__":
     t_draw = t0
     while True:
         t = time() - t0
-        pos, t_draw = controller_draw(joystick,pos,t_draw,gain)
+        pos, t_draw = controller_draw(joystick,pos,t_draw,gain,t)
         input_ball.move(pos)
         animation_window.update()
 
