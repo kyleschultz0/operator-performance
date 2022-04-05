@@ -15,7 +15,6 @@ class Trajectory:
         t = np.linspace(0, T, 100*T)
         yd = np.zeros(t.shape) + 29.5/2
         xd = np.zeros(t.shape)
-        vd = np.zeros(t.shape)
 
         if self.shape == "sines":
             #== Sine variables ==#
@@ -36,18 +35,13 @@ class Trajectory:
 
             for i in range(0,f.shape[1]):
                 xd += A[0, i]*np.sin(f[0, i]*t)
-                vd += A[0, i]*f[0, i]*np.cos(f[0, i]*t)
 
             xd -= xd[0]
             
         self.t = t
         self.xd = xd
         self.yd = yd
-        self.vd = vd
-    
-    def veld(self, t): 
-        return 1360/36*np.interp(t, self.t, self.vd)
-
+        
     def coordinates(self, t):
         return np.array([np.interp(t, self.t, self.xd), np.interp(t, self.t, self.yd)])
 

@@ -148,7 +148,7 @@ if __name__ == "__main__":
 
         t = loop_timer(t0w, Tw, print_loop_time=False)
 
-        pos_input, t_draw = controller_draw(joystick,pos_input,t_draw,gain,trajectory,t)
+        pos_input, t_draw = controller_draw(joystick,pos_input,t_draw,gain)
         pos_input[1] = 1200/2
            
         theta_out = np.zeros(2)
